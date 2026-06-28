@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/argocd/platform/gitlab/values-local.yaml
-    - repoURL: https://github.com/elkouhen/platform-gitops.git
+    - repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
       targetRevision: main
       ref: values
   destination:

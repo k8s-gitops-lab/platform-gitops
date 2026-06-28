@@ -36,7 +36,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/elkouhen/platform-gitops.git
+        repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
         targetRevision: main
         path: "{{ .path }}"
       destination:

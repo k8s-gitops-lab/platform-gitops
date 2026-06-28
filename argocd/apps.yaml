@@ -1,6 +1,6 @@
 platform:
   domain: 192.168.33.100.nip.io
-  repoURL: https://github.com/elkouhen/platform-gitops.git
+  repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
   targetRevision: main
   registry:
     host: registry.registry.svc.cluster.local:5000
