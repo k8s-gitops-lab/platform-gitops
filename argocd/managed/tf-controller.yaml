@@ -10,41 +10,40 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
-  sources:
-    - repoURL: https://flux-iac.github.io/tofu-controller/
-      chart: tofu-controller
-      targetRevision: 0.16.4
-      helm:
-        releaseName: tf-controller
-        values: |
-          replicaCount: 1
+  # source: singulier (pas sources:) pour qu'ArgoCD installe les CRDs Helm
+  source:
+    repoURL: https://flux-iac.github.io/tofu-controller/
+    chart: tofu-controller
+    targetRevision: 0.16.4
+    helm:
+      releaseName: tf-controller
+      values: |
+        replicaCount: 1
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 500m
+
+        awsPackage:
+          install: false
+
+        runner:
+          image:
+            repository: ghcr.io/flux-iac/tf-runner
+            tag: v0.16.4
           resources:
             requests:
               memory: 64Mi
               cpu: 100m
             limits:
-              memory: 256Mi
+              memory: 512Mi
               cpu: 500m
 
-          # Désactive le package AWS (activé par défaut, crée un OCIRepository
-          # vers ghcr.io/flux-iac/aws-primitive-modules inaccessible depuis ce cluster)
-          awsPackage:
-            install: false
-
-          runner:
-            image:
-              repository: ghcr.io/flux-iac/tf-runner
-              tag: v0.16.4
-            resources:
-              requests:
-                memory: 64Mi
-                cpu: 100m
-              limits:
-                memory: 512Mi
-                cpu: 500m
-
-          branchPlanner:
-            enabled: false
+        branchPlanner:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: flux-system
