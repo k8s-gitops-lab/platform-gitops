@@ -8,7 +8,6 @@ metadata:
   annotations:
     # Doit syncer après tf-controller (CRDs Terraform disponibles)
     argocd.argoproj.io/sync-wave: "2"
-    argocd.argoproj.io/skip-reconcile: "true"
 spec:
   project: default
   source:

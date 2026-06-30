@@ -21,16 +21,14 @@ spec:
             path: argocd/platform/argocd-ui
             namespace: argocd
             wave: "0"
-          # disabled: gitlab-routes
-          #- name: gitlab-routes
-          #  path: argocd/platform/gitlab-routes
-          #  namespace: gitlab
-          #  wave: "1"
-          # disabled: gitlab-minio-patch
-          #- name: gitlab-minio-patch
-          #  path: argocd/platform/gitlab-minio-patch
-          #  namespace: gitlab
-          #  wave: "1"
+          - name: gitlab-routes
+            path: argocd/platform/gitlab-routes
+            namespace: gitlab
+            wave: "1"
+          - name: gitlab-minio-patch
+            path: argocd/platform/gitlab-minio-patch
+            namespace: gitlab
+            wave: "1"
   template:
     metadata:
       name: "{{ .name }}"
