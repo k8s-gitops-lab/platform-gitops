@@ -6,7 +6,7 @@ metadata:
   namespace: argocd
 spec:
   sourceRepos:
-  - http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+  - http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
   destinations:
   - server: https://kubernetes.default.svc
     namespace: helloworld-dev
@@ -37,28 +37,28 @@ spec:
         env: dev
         branch: dev
         namespace: helloworld-dev
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
         path: k8s
       - app: helloworld
         project: helloworld
         env: rec
         branch: rec
         namespace: helloworld-rec
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
         path: k8s
       - app: helloworld
         project: helloworld
         env: preprod
         branch: preprod
         namespace: helloworld-preprod
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
         path: k8s
       - app: helloworld
         project: helloworld
         env: prod
         branch: main
         namespace: helloworld
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
         path: k8s
   template:
     metadata:

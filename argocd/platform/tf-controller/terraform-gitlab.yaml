@@ -16,7 +16,7 @@ spec:
     namespace: flux-system
   vars:
     - name: gitlab_url
-      value: "http://gitlab-webservice-default.gitlab.svc:8181"
+      value: "http://gitlab.192.168.33.100.nip.io"
   varsFrom:
     - kind: Secret
       name: gitlab-tf-credentials

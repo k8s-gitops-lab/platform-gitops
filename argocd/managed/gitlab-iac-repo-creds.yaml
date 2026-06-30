@@ -104,7 +104,7 @@ spec:
 
               kubectl -n argocd create secret generic gitlab-helloworld-iac-repo \
                 --from-literal=type=git \
-                --from-literal=url=http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git \
+                --from-literal=url=http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git \
                 --from-literal=username=root \
                 --from-literal=password="$password" \
                 --dry-run=client -o yaml \

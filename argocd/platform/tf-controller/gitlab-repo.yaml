@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   interval: 1m
-  url: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/helloworld-iac.git
+  url: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
   ref:
     branch: main
   secretRef:
