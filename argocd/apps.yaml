@@ -3,7 +3,7 @@ platform:
   repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
   targetRevision: main
   registry:
-    host: registry.registry.svc.cluster.local:5000
+    host: ghcr.io/poc-devops-elkouhen
 
 gitlab:
   # Constante de plateforme (même instance GitLab pour toutes les apps/services) --
