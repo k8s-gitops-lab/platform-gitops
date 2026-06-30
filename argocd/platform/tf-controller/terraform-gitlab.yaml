@@ -12,7 +12,7 @@ spec:
   path: ./terraform
   sourceRef:
     kind: GitRepository
-    name: helloworld-iac
+    name: gitlab-projects-iac
     namespace: flux-system
   vars:
     - name: gitlab_url
@@ -22,8 +22,12 @@ spec:
       name: gitlab-tf-credentials
       varsKeys:
         - gitlab_token
+    - kind: Secret
+      name: github-credentials
+      varsKeys:
+        - token: github_token
   backendConfig:
-    secretSuffix: gitlab-iac
+    secretSuffix: gitlab-projects-iac
     inClusterConfig: true
   runnerPodTemplate:
     spec:

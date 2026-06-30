@@ -1,15 +1,16 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: helloworld-iac
+  name: gitlab-projects-iac
   namespace: flux-system
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   interval: 1m
-  url: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+  url: https://github.com/poc-devops-elkouhen/gitlab-projects-iac.git
   ref:
     branch: main
   secretRef:
-    # Secret créé par tf-credentials-creator (username=oauth2, password=<PAT>)
-    name: gitlab-tf-credentials
+    # Secret créé manuellement : kubectl create secret generic github-credentials
+    # -n flux-system --from-literal=username=x-token --from-literal=password=<PAT>
+    name: github-credentials
