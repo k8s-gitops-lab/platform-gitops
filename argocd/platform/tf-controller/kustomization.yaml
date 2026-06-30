@@ -1,6 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - platform-gitops-source.yaml
+  - flux-secrets-kustomization.yaml
   - tf-credentials-job.yaml
   - terraform-runner-rbac.yaml
   - cluster-admin-binding.yaml
