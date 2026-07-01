@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: test
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+  - missingkey=error
+  generators:
+  - list:
+      elements:
+      - app: test
+        project: test
+        env: dev
+        branch: dev
+        namespace: test-dev
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/test-iac.git
+        path: k8s
+      - app: test
+        project: test
+        env: rec
+        branch: rec
+        namespace: test-rec
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/test-iac.git
+        path: k8s
+      - app: test
+        project: test
+        env: preprod
+        branch: preprod
+        namespace: test-preprod
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/test-iac.git
+        path: k8s
+      - app: test
+        project: test
+        env: prod
+        branch: main
+        namespace: test
+        repoURL: http://gitlab.192.168.33.100.nip.io/root/test-iac.git
+        path: k8s
+  template:
+    metadata:
+      name: '{{ .app }}-{{ .env }}'
+      namespace: argocd
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: '{{ .project }}'
+      source:
+        repoURL: '{{ .repoURL }}'
+        targetRevision: '{{ .branch }}'
+        path: '{{ .path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ .namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

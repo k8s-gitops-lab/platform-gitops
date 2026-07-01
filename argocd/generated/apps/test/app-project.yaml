@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test
+  namespace: argocd
+spec:
+  description: Application de démonstration du pattern CI/CD complet
+  sourceRepos:
+  - http://gitlab.192.168.33.100.nip.io/root/test-iac.git
+  destinations:
+  - server: https://kubernetes.default.svc
+    namespace: test-dev
+  - server: https://kubernetes.default.svc
+    namespace: test-rec
+  - server: https://kubernetes.default.svc
+    namespace: test-preprod
+  - server: https://kubernetes.default.svc
+    namespace: test
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
