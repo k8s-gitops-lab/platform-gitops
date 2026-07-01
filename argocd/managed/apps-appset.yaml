@@ -1,25 +1,3 @@
-# Généré par scripts/render-argocd-apps.py depuis argocd/apps.yaml + argocd/apps/*.yaml -- ne pas éditer à la main.
-apiVersion: argoproj.io/v1alpha1
-kind: AppProject
-metadata:
-  name: helloworld
-  namespace: argocd
-spec:
-  sourceRepos:
-  - http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
-  destinations:
-  - server: https://kubernetes.default.svc
-    namespace: helloworld-dev
-  - server: https://kubernetes.default.svc
-    namespace: helloworld-rec
-  - server: https://kubernetes.default.svc
-    namespace: helloworld-preprod
-  - server: https://kubernetes.default.svc
-    namespace: helloworld
-  clusterResourceWhitelist:
-  - group: ''
-    kind: Namespace
----
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -28,56 +6,31 @@ metadata:
 spec:
   goTemplate: true
   goTemplateOptions:
-  - missingkey=error
+    - missingkey=error
   generators:
-  - list:
-      elements:
-      - app: helloworld
-        project: helloworld
-        env: dev
-        branch: dev
-        namespace: helloworld-dev
-        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
-        path: k8s
-      - app: helloworld
-        project: helloworld
-        env: rec
-        branch: rec
-        namespace: helloworld-rec
-        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
-        path: k8s
-      - app: helloworld
-        project: helloworld
-        env: preprod
-        branch: preprod
-        namespace: helloworld-preprod
-        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
-        path: k8s
-      - app: helloworld
-        project: helloworld
-        env: prod
-        branch: main
-        namespace: helloworld
-        repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
-        path: k8s
+    - git:
+        repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
+        revision: main
+        directories:
+          - path: argocd/apps/*
   template:
     metadata:
-      name: '{{ .app }}-{{ .env }}'
+      name: "app-config-{{ .path.basename }}"
       namespace: argocd
       finalizers:
-      - resources-finalizer.argocd.argoproj.io
+        - resources-finalizer.argocd.argoproj.io
     spec:
-      project: '{{ .project }}'
+      project: default
       source:
-        repoURL: '{{ .repoURL }}'
-        targetRevision: '{{ .branch }}'
-        path: '{{ .path }}'
+        repoURL: https://github.com/poc-devops-elkouhen/platform-gitops
+        targetRevision: main
+        path: "{{ .path.path }}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{ .namespace }}'
+        namespace: argocd
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
-        - CreateNamespace=true
+          - CreateNamespace=true

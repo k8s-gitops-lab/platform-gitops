@@ -4,7 +4,6 @@ resources:
   - zscaler-ca-configmap.yaml
   - platform-gitops-source.yaml
   - flux-secrets-kustomization.yaml
-  - tf-credentials-job.yaml
   - terraform-runner-rbac.yaml
   - cluster-admin-binding.yaml
   - gitlab-repo.yaml

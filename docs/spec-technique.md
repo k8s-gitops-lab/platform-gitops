@@ -5,13 +5,17 @@
 ```
 argocd/
   apps.yaml                    Métadonnées globales (domaine, registry, repoURL GitOps)
-  apps/                        Inventaire des applications (un fichier par app)
-    helloworld.yaml
+  apps/
+    helloworld/
+      app.yaml                 Métadonnées de l'application
+      app-project.yaml         AppProject ArgoCD dédié
+      applicationset.yaml      Applications ArgoCD par environnement
+      repo-creds.yaml          Credentials repo dédiés
   managed/                     GÉNÉRÉ — ne pas éditer à la main
-    apps-appset.yaml           AppProject + ApplicationSet par app (généré par render-argocd-apps.py)
+    apps-appset.yaml           ApplicationSet générique vers argocd/apps/*
     gitlab.yaml                Application ArgoCD pour GitLab (chart Helm)
     platform-appset.yaml       ApplicationSet pour les composants plateforme
-    gitlab-iac-repo-creds.yaml Secret ArgoCD pour accéder aux dépôts manifests GitLab
+    terraform-gitlab.yaml      Application ArgoCD pour le contrôleur Terraform GitLab
   platform/                    Manifests des composants plateforme
     argocd-config/             Kustomization : argocd-cm, argocd-rbac-cm, argocd-cmd-params-cm
     argocd-ui/                 HTTPRoutes ArgoCD et Dex
@@ -22,6 +26,9 @@ docs/
   prd.md
   spec-fonctionnelle.md
   spec-technique.md
+flux-secrets/
+  github-credentials.yaml     Secret Flux chiffré SOPS pour lire GitHub
+  gitlab-tf-credentials.yaml  Secret Terraform chiffré SOPS pour piloter GitLab/GitHub
 ```
 
 ## `argocd/apps.yaml` — métadonnées plateforme
@@ -46,14 +53,59 @@ appsDir: apps
 d'ArgoCD. Une fois GitLab opérationnel, ArgoCD peut être reconfiguré pour
 pointer vers l'instance GitLab interne.
 
-## `argocd/managed/apps-appset.yaml` — format généré
+Malgré son nom historique, ce fichier ne doit pas devenir un inventaire
+applicatif détaillé. Les ressources d'une application doivent être regroupées
+dans `argocd/apps/<app>/`.
 
-Contient, dans l'ordre :
-1. Un `AppProject` par app (whitelist `Namespace` pour `CreateNamespace=true`).
-2. Un `ApplicationSet` avec un générateur `list` et un template Go.
+## Secrets GitOps (`flux-secrets/`)
 
-Le template génère des `Application` nommées `<app>-<env>` dans le namespace
-`argocd`, pointant vers la branche d'environnement du dépôt manifests de l'app.
+Les secrets applicatifs nécessaires aux contrôleurs GitOps sont versionnés sous
+forme chiffrée avec SOPS/age dans `flux-secrets/`.
+
+| Secret Kubernetes | Fichier | Consommateur |
+|-------------------|---------|--------------|
+| `github-credentials` | `flux-secrets/github-credentials.yaml` | `GitRepository/gitlab-projects-iac` et `Terraform/gitlab-iac` |
+| `gitlab-tf-credentials` | `flux-secrets/gitlab-tf-credentials.yaml` | `Terraform/gitlab-iac` |
+
+Flux applique ces secrets via `argocd/platform/tf-controller/flux-secrets-kustomization.yaml`
+avec `decryption.provider: sops` et `secretRef.name: sops-age`. Le secret
+`sops-age` reste un prérequis de bootstrap : il contient la clé privée age et ne
+doit pas être committé.
+
+Ce modèle remplace le Job impératif qui lisait le mot de passe root GitLab pour
+fabriquer `gitlab-tf-credentials` au runtime. La rotation se fait maintenant en
+éditant le manifeste avec `sops`, puis en laissant Flux réconcilier le secret.
+Si l'instance GitLab est recréée sans conserver sa base de données, ce PAT doit
+être régénéré dans GitLab puis rechiffré dans `gitlab-tf-credentials.yaml`.
+
+## `argocd/managed/` — point d'entrée généré
+
+`argocd/managed/` contient les objets ArgoCD que l'Application racine applique
+pour amorcer la plateforme : GitLab, Flux/tofu-controller, CRDs Terraform et
+ApplicationSet des composants plateforme. Il contient aussi l'ApplicationSet
+générique `apps-appset.yaml`, qui découvre les dossiers `argocd/apps/*` et crée
+une Application ArgoCD par dossier applicatif.
+
+Ce répertoire n'est pas une couche métier distincte de `argocd/platform/` :
+- `argocd/platform/` contient les manifests sources des composants plateforme ;
+- `argocd/managed/` contient les Applications ArgoCD générées qui pointent vers
+  ces manifests.
+
+Il ne doit pas contenir d'`AppProject`, `Application`, `ApplicationSet`,
+credential ou namespace propre à une application. Ces objets doivent être dans
+`argocd/apps/<app>/`.
+
+## `argocd/apps/<app>/` — configuration dédiée par application
+
+Chaque application possède un dossier autonome. Pour `helloworld` :
+
+| Fichier | Rôle |
+|---------|------|
+| `app.yaml` | Métadonnées de l'application et de ses dépôts code/IaC |
+| `app-project.yaml` | Périmètre ArgoCD autorisé pour l'application |
+| `applicationset.yaml` | Applications ArgoCD `dev`, `rec`, `preprod`, `prod` |
+| `repo-creds.yaml` | Secret ArgoCD/RBAC dédiés au dépôt manifests de l'app |
+| `kustomization.yaml` | Agrège les ressources dédiées à l'application |
 
 ## Configuration ArgoCD (`argocd/platform/argocd-config/`)
 

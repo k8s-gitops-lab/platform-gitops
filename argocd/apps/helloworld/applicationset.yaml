@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: helloworld
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - list:
+        elements:
+          - app: helloworld
+            project: helloworld
+            env: dev
+            branch: dev
+            namespace: helloworld-dev
+            repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+            path: k8s
+          - app: helloworld
+            project: helloworld
+            env: rec
+            branch: rec
+            namespace: helloworld-rec
+            repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+            path: k8s
+          - app: helloworld
+            project: helloworld
+            env: preprod
+            branch: preprod
+            namespace: helloworld-preprod
+            repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+            path: k8s
+          - app: helloworld
+            project: helloworld
+            env: prod
+            branch: main
+            namespace: helloworld
+            repoURL: http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+            path: k8s
+  template:
+    metadata:
+      name: '{{ .app }}-{{ .env }}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: '{{ .project }}'
+      source:
+        repoURL: '{{ .repoURL }}'
+        targetRevision: '{{ .branch }}'
+        path: '{{ .path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ .namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

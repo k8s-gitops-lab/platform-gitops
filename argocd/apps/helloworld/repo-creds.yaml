@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gitlab-iac-repo-creds
+  name: gitlab-iac-repo-creds-helloworld
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -9,7 +9,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: gitlab-iac-repo-creds-read
+  name: gitlab-iac-repo-creds-helloworld-read
   namespace: gitlab
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -22,23 +22,23 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gitlab-iac-repo-creds-read
+  name: gitlab-iac-repo-creds-helloworld-read
   namespace: gitlab
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: gitlab-iac-repo-creds-read
+  name: gitlab-iac-repo-creds-helloworld-read
 subjects:
   - kind: ServiceAccount
-    name: gitlab-iac-repo-creds
+    name: gitlab-iac-repo-creds-helloworld
     namespace: argocd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: gitlab-iac-repo-creds-write
+  name: gitlab-iac-repo-creds-helloworld-write
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -54,23 +54,23 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gitlab-iac-repo-creds-write
+  name: gitlab-iac-repo-creds-helloworld-write
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: gitlab-iac-repo-creds-write
+  name: gitlab-iac-repo-creds-helloworld-write
 subjects:
   - kind: ServiceAccount
-    name: gitlab-iac-repo-creds
+    name: gitlab-iac-repo-creds-helloworld
     namespace: argocd
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gitlab-iac-repo-creds
+  name: gitlab-iac-repo-creds-helloworld
   namespace: argocd
   annotations:
     argocd.argoproj.io/hook: Sync
@@ -80,7 +80,7 @@ spec:
   backoffLimit: 2
   template:
     spec:
-      serviceAccountName: gitlab-iac-repo-creds
+      serviceAccountName: gitlab-iac-repo-creds-helloworld
       restartPolicy: Never
       containers:
         - name: create-secret

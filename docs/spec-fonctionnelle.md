@@ -9,28 +9,10 @@ seule fois à la main depuis `platform-cicd`. Cette Application cible
 Tout ce qui se trouve dans `argocd/managed/` est donc géré par ArgoCD :
 modifications committées → réconciliation automatique sur le cluster.
 
-## Inventaire des applications
-
-Les applications sont déclarées dans `argocd/apps/*.yaml`. Format minimal :
-
-```yaml
-name: myapp
-services:
-  - myapp-svc
-  - myapp-gui
-manifests:
-  path: k8s
-```
-
-Les champs non déclarés sont dérivés par convention dans `platform_inventory.py` :
-
-| Champ omis | Valeur dérivée |
-|------------|----------------|
-| `manifests.projectPath` | `root/<name>-iac` |
-| `manifests.argocdRepoURL` | URL in-cluster GitLab |
-| `code.projectPath` | `root/<name>` |
-| `environments` | `dev`, `rec`, `preprod` (si `hasPreprod: true`), `prod` |
-| `showcaseService` | premier service dont le nom se termine par `gui/ui/web/front` |
+`argocd/managed/` n'est pas une séparation fonctionnelle. C'est une sortie
+générée qui contient les objets ArgoCD d'amorçage. Il peut contenir un
+ApplicationSet générique qui pointe vers `argocd/apps/*`, mais les détails d'une
+application restent dans son dossier dédié.
 
 ## Composants plateforme (`argocd/platform/`)
 
@@ -44,14 +26,15 @@ Les champs non déclarés sont dérivés par convention dans `platform_inventory
 
 ## Flux d'onboarding d'une application
 
-1. Créer `argocd/apps/<app>.yaml` (format minimal ci-dessus).
-2. Depuis `platform-cicd` : `make argocd-apps-render` → commit `argocd/managed/apps-appset.yaml`.
-3. Pousser sur `main` → ArgoCD détecte le changement → crée les Applications.
-4. Depuis `toolbox` : `make gitlab-seed` → crée les projets GitLab + seed + CI.
+L'onboarding applicatif ajoute un dossier `argocd/apps/<app>/` qui regroupe
+toute la configuration GitOps dédiée à l'application : métadonnées, AppProject,
+ApplicationSet par environnement et éventuels credentials repo. Le reste du
+seed applicatif reste porté par `toolbox`/les outils de seed pour créer les
+projets GitLab et les dépôts `*-iac`.
 
 ## Promotion des applications
 
 Les branches d'environnement (`dev`, `rec`, `preprod`) du dépôt manifests
-(`helloworld-iac`) sont mises à jour par la CI applicative via `deploy.py`.
-Ce dépôt ne porte pas de logique de promotion — il porte uniquement la
-déclaration de quelles branches ArgoCD doit surveiller.
+(`*-iac`) sont mises à jour par la CI applicative via `deploy.py`. Ce dépôt ne
+porte pas la logique de promotion ; il déclare seulement, dans
+`argocd/apps/<app>/`, les branches applicatives suivies par ArgoCD.

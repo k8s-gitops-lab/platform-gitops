@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - github-credentials.yaml
-  - gitlab-tf-credentials.yaml
+  - app-project.yaml
+  - applicationset.yaml
+  - repo-creds.yaml
