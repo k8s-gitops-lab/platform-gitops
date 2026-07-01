@@ -24,7 +24,6 @@ docs/
   spec-technique.md
 flux-secrets/
   github-credentials.yaml     Secret Flux chiffré SOPS pour lire GitHub
-  gitlab-tf-credentials.yaml  Secret Terraform chiffré SOPS pour piloter GitLab/GitHub
 ```
 
 ## `argocd/apps.yaml` — métadonnées plateforme
@@ -61,18 +60,16 @@ forme chiffrée avec SOPS/age dans `flux-secrets/`.
 | Secret Kubernetes | Fichier | Consommateur |
 |-------------------|---------|--------------|
 | `github-credentials` | `flux-secrets/github-credentials.yaml` | `GitRepository/gitlab-projects-iac` et `Terraform/gitlab-iac` |
-| `gitlab-tf-credentials` | `flux-secrets/gitlab-tf-credentials.yaml` | `Terraform/gitlab-iac` |
 
 Flux applique ces secrets via `argocd/platform/tf-controller/flux-secrets-kustomization.yaml`
 avec `decryption.provider: sops` et `secretRef.name: sops-age`. Le secret
 `sops-age` reste un prérequis de bootstrap : il contient la clé privée age et ne
 doit pas être committé.
 
-Ce modèle remplace le Job impératif qui lisait le mot de passe root GitLab pour
-fabriquer `gitlab-tf-credentials` au runtime. La rotation se fait maintenant en
-éditant le manifeste avec `sops`, puis en laissant Flux réconcilier le secret.
-Si l'instance GitLab est recréée sans conserver sa base de données, ce PAT doit
-être régénéré dans GitLab puis rechiffré dans `gitlab-tf-credentials.yaml`.
+Le secret `gitlab-tf-credentials` n'est pas versionné : `platform-cicd` le crée
+après `gitlab-wait` via `make gitlab-tf-credentials`. Cette étape lit le mot de
+passe root initial GitLab, crée/rotate un PAT `terraform-controller`, puis écrit
+le Secret Kubernetes dans `flux-system` pour `Terraform/gitlab-iac`.
 
 ## `argocd/managed/` — point d'entrée généré
 
