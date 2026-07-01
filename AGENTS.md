@@ -55,12 +55,34 @@ flux-secrets/            Secrets Kubernetes chiffrés avec SOPS/age et appliqué
 
 ## Ajouter une application
 
-Créer un dossier `argocd/apps/<app>/` contenant :
+Ouvrir une PR ajoutant `argocd/apps/<app>.yaml` avec au minimum :
 
-- `app.yaml` : description de l'application, ses modules/services et ses dépôts.
+```yaml
+name: monapp
+description: "Description courte de l'application"
+services: [monapp-api, monapp-gui]
+hasPreprod: true
+```
 
-Puis lancer `make argocd-apps-render` depuis `platform-cicd` et committer les
-manifests générés sous `argocd/generated/apps/<app>/`.
+Ce dépôt est mergé sur GitHub, mais l'automatisation tourne côté GitLab : le
+projet GitLab `platform-gitops` (`gitlab-projects-iac`) est un mirror pull
+continu depuis GitHub (`mirror_trigger_builds = true`), donc chaque merge sur
+`main` déclenche le pipeline `.gitlab-ci.yml` de ce dépôt sur le runner interne.
+Ce pipeline :
+1. régénère `argocd/generated/apps/<app>/*` et `argocd/managed/apps-appset.yaml`
+   (via `platform-cicd/scripts/render-argocd-apps.py`) et les commit
+   directement sur `main` **sur GitHub** (le mirror GitLab n'est jamais un
+   cible de push, il serait écrasé au prochain pull) ;
+2. régénère `gitlab-projects-iac/terraform/apps.auto.tfvars.json` (via
+   `toolbox/scripts/render-gitlab-projects.py`) et le commit sur ce dépôt
+   (GitHub) — le `Terraform` `gitlab-iac` (Flux) crée alors les projets GitLab
+   `<app>`/`<app>-iac`.
+
+Plus besoin de lancer `make argocd-apps-render` à la main ni de toucher
+`gitlab-projects-iac` : une seule PR sur `argocd/apps/` suffit. Le pipeline
+utilise la variable CI/CD groupe `GITHUB_TOKEN` (groupe `infra`, déclarée dans
+`gitlab-projects-iac/terraform/main.tf`, réutilise `var.github_token`) pour
+cloner `platform-cicd`/`toolbox` et pousser vers GitHub.
 
 ## Ce qu'il ne faut pas faire
 

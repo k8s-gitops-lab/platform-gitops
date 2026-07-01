@@ -1,0 +1,4 @@
+name: helloworld
+description: "Application de démonstration du pattern CI/CD complet"
+services: [helloworld-svc, helloworld-gui]
+hasPreprod: true

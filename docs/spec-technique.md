@@ -3,6 +3,8 @@
 ## Structure du dépôt
 
 ```
+.github/workflows/
+  onboard-apps.yml             Régénère argocd/generated/ et gitlab-projects-iac au merge d'une app
 argocd/
   apps.yaml                    Métadonnées globales (domaine, registry, repoURL GitOps)
   apps/                        Descriptions applicatives ajoutées après bootstrap
@@ -88,21 +90,26 @@ Il ne doit pas contenir d'`AppProject`, `Application`, `ApplicationSet`,
 credential ou namespace propre à une application. Ces objets doivent être dans
 `argocd/generated/apps/<app>/` et générés depuis `argocd/apps/<app>/app.yaml`.
 
-## `argocd/apps/<app>/app.yaml` — description applicative
+## `argocd/apps/<app>.yaml` — description applicative
 
 Le dépôt est livré sans application déclarée pour que le provisioning plateforme
 reste indépendant. Après provisioning, chaque application possède une
-description source :
+description source, écrite à la main (champs minimums : `name`, `description`,
+`services`) ou via `toolbox init-project.py` :
 
 | Fichier | Rôle |
 |---------|------|
-| `argocd/apps/<app>/app.yaml` | Nom, modules/services, dépôt code et dépôt IaC |
-| `argocd/generated/apps/<app>/app-project.yaml` | Périmètre ArgoCD autorisé, généré |
+| `argocd/apps/<app>.yaml` | Nom, description, modules/services, dépôt code et dépôt IaC |
+| `argocd/generated/apps/<app>/app-project.yaml` | Périmètre ArgoCD autorisé, généré (inclut `spec.description`) |
 | `argocd/generated/apps/<app>/applicationset.yaml` | Applications ArgoCD par environnement, générées |
 | `argocd/generated/apps/<app>/repo-creds.yaml` | Secret ArgoCD/RBAC dédiés au dépôt manifests de l'app, générés |
 | `argocd/generated/apps/<app>/kustomization.yaml` | Agrège les ressources générées |
 
-La génération est lancée depuis `platform-cicd` :
+Depuis l'ajout du workflow `.github/workflows/onboard-apps.yml`, la génération
+n'est plus une étape manuelle : elle se déclenche automatiquement au merge
+d'une PR touchant `argocd/apps/**`. `make argocd-apps-render` /
+`make check-generated` (depuis `platform-cicd`) restent disponibles pour
+vérifier ou régénérer en local :
 
 ```bash
 make argocd-apps-render

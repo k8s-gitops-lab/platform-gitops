@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: helloworld
+  namespace: argocd
+spec:
+  description: Application de démonstration du pattern CI/CD complet
+  sourceRepos:
+  - http://gitlab.192.168.33.100.nip.io/root/helloworld-iac.git
+  destinations:
+  - server: https://kubernetes.default.svc
+    namespace: helloworld-dev
+  - server: https://kubernetes.default.svc
+    namespace: helloworld-rec
+  - server: https://kubernetes.default.svc
+    namespace: helloworld-preprod
+  - server: https://kubernetes.default.svc
+    namespace: helloworld
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace

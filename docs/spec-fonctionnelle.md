@@ -30,15 +30,22 @@ détails d'une application viennent de sa description `argocd/apps/<app>/app.yam
 
 ## Flux d'onboarding d'une application
 
-L'onboarding applicatif ajoute un dossier `argocd/apps/<app>/` contenant
-`app.yaml`, la description source de l'application : modules/services,
-environnements optionnels et dépôts code/IaC. Les AppProject, ApplicationSet par
-environnement et éventuels credentials repo sont générés sous
-`argocd/generated/apps/<app>/`.
+L'onboarding applicatif ajoute un fichier `argocd/apps/<app>.yaml`, la
+description source de l'application : nom, description, modules/services,
+environnements optionnels. Une simple PR sur GitHub ajoutant ce fichier et
+mergée sur `main` est propagée par mirror pull vers le projet GitLab interne
+`platform-gitops`, ce qui déclenche son pipeline `.gitlab-ci.yml`, qui :
+
+1. génère les AppProject, ApplicationSet par environnement et credentials repo
+   sous `argocd/generated/apps/<app>/` (via `platform-cicd/scripts/render-argocd-apps.py`)
+   et les commit directement sur `main` ;
+2. génère `gitlab-projects-iac/terraform/apps.auto.tfvars.json` (via
+   `toolbox/scripts/render-gitlab-projects.py`) et le commit sur ce dépôt.
 
 La création des projets GitLab et des dépôts `*-iac` n'est plus portée par
-`toolbox`. Elle est déclarée dans le dépôt `gitlab-projects-iac` et appliquée
-par le `Terraform/gitlab-iac` exécuté par tf-controller.
+`toolbox`. Elle est déclarée (désormais automatiquement) dans le dépôt
+`gitlab-projects-iac` et appliquée par le `Terraform/gitlab-iac` exécuté par
+tf-controller. Aucune étape manuelle n'est requise après le merge de la PR.
 
 ## Promotion des applications
 
