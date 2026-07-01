@@ -1,7 +1,0 @@
-name: test
-description: "Application de démonstration du pattern CI/CD complet"
-services: [test-svc, test-gui]
-hasPreprod: true
-# helloworld préexistait sur GitHub avant l'automatisation de l'onboarding :
-# ses projets GitLab doivent être importés, pas créés vides.
-importFromGithub: false
