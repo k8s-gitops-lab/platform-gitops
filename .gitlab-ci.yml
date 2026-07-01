@@ -1,11 +1,13 @@
 stages:
   - onboard
 
-# Se déclenche automatiquement quand le mirror pull (gitlab_project.platform_gitops,
-# mirror_trigger_builds = true) reçoit un changement sur main depuis GitHub.
-# Régénère les manifests ArgoCD (platform-cicd) et la liste des projets GitLab
-# (toolbox), puis pousse les commits générés directement vers GitHub (dépôt
-# canonique surveillé par ArgoCD/Flux) — jamais vers ce mirror.
+# Les PR/MR sur platform-gitops se font directement sur ce projet GitLab (pas
+# sur GitHub) : ce pipeline se déclenche nativement au merge sur main, sans
+# délai de mirror. Il régénère les manifests ArgoCD (platform-cicd) et la
+# liste des projets GitLab (toolbox), commit sur ce même projet (le push
+# mirror gitlab_project_mirror.platform_gitops_to_github propage ensuite vers
+# GitHub, dépôt surveillé par ArgoCD/Flux), et pousse directement vers GitHub
+# pour gitlab-projects-iac (qui n'a pas d'équivalent GitLab).
 onboard-apps:
   stage: onboard
   image: python:3.12-slim
@@ -29,7 +31,8 @@ onboard-apps:
       if [ -n "$(git status --porcelain -- argocd/generated argocd/managed)" ]; then
         git add argocd/generated argocd/managed
         git commit -m "chore(argocd): regenerate app manifests [bot]"
-        git push "https://x-access-token:${GITHUB_TOKEN}@github.com/poc-devops-elkouhen/platform-gitops.git" HEAD:main
+        git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+        git push origin HEAD:main
       else
         echo "Rien a regenerer cote platform-gitops."
       fi

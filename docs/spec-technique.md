@@ -3,8 +3,7 @@
 ## Structure du dépôt
 
 ```
-.github/workflows/
-  onboard-apps.yml             Régénère argocd/generated/ et gitlab-projects-iac au merge d'une app
+.gitlab-ci.yml                 Pipeline GitLab : régénère argocd/generated/ et gitlab-projects-iac au merge d'une app
 argocd/
   apps.yaml                    Métadonnées globales (domaine, registry, repoURL GitOps)
   apps/                        Descriptions applicatives ajoutées après bootstrap
@@ -105,9 +104,9 @@ description source, écrite à la main (champs minimums : `name`, `description`,
 | `argocd/generated/apps/<app>/repo-creds.yaml` | Secret ArgoCD/RBAC dédiés au dépôt manifests de l'app, générés |
 | `argocd/generated/apps/<app>/kustomization.yaml` | Agrège les ressources générées |
 
-Depuis l'ajout du workflow `.github/workflows/onboard-apps.yml`, la génération
-n'est plus une étape manuelle : elle se déclenche automatiquement au merge
-d'une PR touchant `argocd/apps/**`. `make argocd-apps-render` /
+Depuis l'ajout du pipeline `.gitlab-ci.yml` (projet GitLab `platform-gitops`),
+la génération n'est plus une étape manuelle : elle se déclenche automatiquement
+au merge d'une MR touchant `argocd/apps/**`. `make argocd-apps-render` /
 `make check-generated` (depuis `platform-cicd`) restent disponibles pour
 vérifier ou régénérer en local :
 
