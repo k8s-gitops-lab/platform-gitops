@@ -1,16 +1,24 @@
 stages:
   - onboard
 
-# Se déclenche automatiquement quand le mirror pull (gitlab_project.platform_gitops,
-# mirror_trigger_builds = true) reçoit un changement sur main depuis GitHub.
-# Régénère les manifests ArgoCD (platform-cicd) et la liste des projets GitLab
-# (toolbox), puis pousse les commits générés directement vers GitHub (dépôt
-# canonique surveillé par ArgoCD/Flux) — jamais vers ce mirror.
+# Les PR/MR sur platform-gitops se font directement sur ce projet GitLab (pas
+# sur GitHub) : ce pipeline se déclenche nativement au merge sur main, sans
+# délai de mirror. Il régénère les manifests ArgoCD (platform-cicd) et la
+# liste des projets GitLab (toolbox), commit sur ce même projet (le push
+# mirror gitlab_project_mirror.platform_gitops_to_github propage ensuite vers
+# GitHub, dépôt surveillé par ArgoCD/Flux), et pousse directement vers GitHub
+# pour gitlab-projects-iac (qui n'a pas d'équivalent GitLab).
 onboard-apps:
   stage: onboard
   image: python:3.12-slim
   rules:
-    - changes:
+    # CI_JOB_TOKEN est en lecture seule sur les pipelines de MR (protection
+    # anti-privilege-escalation) : le job ne peut pousser sur main que sur le
+    # pipeline de branche declenche apres le merge, pas sur celui de la MR.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
         - argocd/apps/**/*
   variables:
     GIT_STRATEGY: clone
@@ -29,7 +37,11 @@ onboard-apps:
       if [ -n "$(git status --porcelain -- argocd/generated argocd/managed)" ]; then
         git add argocd/generated argocd/managed
         git commit -m "chore(argocd): regenerate app manifests [bot]"
-        git push "https://x-access-token:${GITHUB_TOKEN}@github.com/poc-devops-elkouhen/platform-gitops.git" HEAD:main
+        # ${CI_SERVER_HOST} est l'URL externe (gitlab.192.168.33.100.nip.io),
+        # TLS self-signed non approuvé par le conteneur du job : on pousse via
+        # l'URL in-cluster HTTP, comme le clone_url du runner (values-local.yaml).
+        git remote set-url origin "http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab-webservice-default.gitlab.svc.cluster.local:8181/${CI_PROJECT_PATH}.git"
+        git push origin HEAD:main
       else
         echo "Rien a regenerer cote platform-gitops."
       fi

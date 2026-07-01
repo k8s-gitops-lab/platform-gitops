@@ -55,7 +55,8 @@ flux-secrets/            Secrets Kubernetes chiffrés avec SOPS/age et appliqué
 
 ## Ajouter une application
 
-Ouvrir une PR ajoutant `argocd/apps/<app>.yaml` avec au minimum :
+Ouvrir une MR **sur le projet GitLab `platform-gitops`** (pas sur GitHub)
+ajoutant `argocd/apps/<app>.yaml` avec au minimum :
 
 ```yaml
 name: monapp
@@ -64,25 +65,31 @@ services: [monapp-api, monapp-gui]
 hasPreprod: true
 ```
 
-Ce dépôt est mergé sur GitHub, mais l'automatisation tourne côté GitLab : le
-projet GitLab `platform-gitops` (`gitlab-projects-iac`) est un mirror pull
-continu depuis GitHub (`mirror_trigger_builds = true`), donc chaque merge sur
-`main` déclenche le pipeline `.gitlab-ci.yml` de ce dépôt sur le runner interne.
-Ce pipeline :
+`platform-gitops` suit le même modèle que les autres projets applicatifs
+(`gitlab-projects-iac/terraform/main.tf`) : importé une fois depuis GitHub au
+bootstrap, développé ensuite sur GitLab, et mirroré en continu vers GitHub
+(`gitlab_project_mirror.platform_gitops_to_github`) — GitHub reste le dépôt
+canonique surveillé par ArgoCD/Flux, sans changement de configuration.
+
+Le merge de la MR déclenche directement (sans délai) le pipeline
+`.gitlab-ci.yml` de ce projet sur le runner interne, qui :
 1. régénère `argocd/generated/apps/<app>/*` et `argocd/managed/apps-appset.yaml`
-   (via `platform-cicd/scripts/render-argocd-apps.py`) et les commit
-   directement sur `main` **sur GitHub** (le mirror GitLab n'est jamais un
-   cible de push, il serait écrasé au prochain pull) ;
+   (via `platform-cicd/scripts/render-argocd-apps.py`) et les commit sur ce
+   même projet GitLab (le push mirror propage ensuite vers GitHub) ;
 2. régénère `gitlab-projects-iac/terraform/apps.auto.tfvars.json` (via
-   `toolbox/scripts/render-gitlab-projects.py`) et le commit sur ce dépôt
-   (GitHub) — le `Terraform` `gitlab-iac` (Flux) crée alors les projets GitLab
-   `<app>`/`<app>-iac`.
+   `toolbox/scripts/render-gitlab-projects.py`) et le commit directement sur
+   GitHub (`gitlab-projects-iac` n'a pas d'équivalent GitLab) — le `Terraform`
+   `gitlab-iac` (Flux) crée alors les projets GitLab `<app>`/`<app>-iac`, créés
+   **vides** (pas d'import GitHub) puisque le code d'une nouvelle app n'existe
+   pas encore ailleurs ; seules les apps historiques (`importFromGithub: true`,
+   ex. `helloworld`) sont importées depuis un repo GitHub préexistant.
 
 Plus besoin de lancer `make argocd-apps-render` à la main ni de toucher
-`gitlab-projects-iac` : une seule PR sur `argocd/apps/` suffit. Le pipeline
+`gitlab-projects-iac` : une seule MR sur `argocd/apps/` suffit. Le pipeline
 utilise la variable CI/CD groupe `GITHUB_TOKEN` (groupe `infra`, déclarée dans
 `gitlab-projects-iac/terraform/main.tf`, réutilise `var.github_token`) pour
-cloner `platform-cicd`/`toolbox` et pousser vers GitHub.
+cloner `platform-cicd`/`toolbox` et pousser vers GitHub, et `CI_JOB_TOKEN` pour
+committer directement sur ce projet GitLab.
 
 ## Ce qu'il ne faut pas faire
 
