@@ -97,7 +97,11 @@ committer directement sur ce projet GitLab.
 - Ne pas éditer manuellement `argocd/generated/apps/<app>/` ; modifier
   `argocd/apps/<app>/app.yaml` puis régénérer.
 - Ne pas committer de secrets non chiffrés dans ce dépôt.
-- Ne pas ajouter de Job qui lit un secret root pour générer un autre secret :
-  préférer un manifeste SOPS dans `flux-secrets/`.
+- Ne pas ajouter de Job qui fabrique le contenu d'un secret `flux-secrets/*.yaml`
+  au runtime : ces secrets restent des manifestes SOPS statiques. En revanche,
+  un Job de copie d'un secret déjà présent en cluster vers un namespace
+  applicatif (ex. `repo-creds.yaml`, `ghcr-pull-secret.yaml`) est le pattern
+  attendu dans `argocd/generated/apps/<app>/`, car ArgoCD ne sait pas déchiffrer
+  SOPS nativement.
 - Ne pas pousser sur `main` sans avoir vérifié que `make check-generated` passe
   dans `platform-cicd`.

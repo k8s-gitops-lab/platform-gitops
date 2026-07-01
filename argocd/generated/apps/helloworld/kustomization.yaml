@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
 - app-project.yaml
 - applicationset.yaml
+- ghcr-pull-secret.yaml
 - repo-creds.yaml

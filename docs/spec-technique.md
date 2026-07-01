@@ -67,6 +67,12 @@ avec `decryption.provider: sops` et `secretRef.name: sops-age`. Le secret
 `sops-age` reste un prérequis de bootstrap : il contient la clé privée age et ne
 doit pas être committé.
 
+Le secret `ghcr-pull` (pull d'images depuis GHCR) n'est pas ici : ArgoCD ne sait
+pas déchiffrer SOPS nativement, donc `control-plane` (`make ghcr-pull-secret`)
+dépose une seule fois un secret source `ghcr-pull-secret` dans le namespace
+`argocd`, et chaque app le recopie dans ses propres namespaces via les Jobs
+définis dans `argocd/generated/apps/<app>/ghcr-pull-secret.yaml`.
+
 Le secret `gitlab-tf-credentials` n'est pas versionné : `platform-cicd` le crée
 après `gitlab-wait` via `make gitlab-tf-credentials`. Cette étape lit le mot de
 passe root initial GitLab, crée/rotate un PAT `terraform-controller`, puis écrit
@@ -101,6 +107,7 @@ description source, écrite à la main (champs minimums : `name`, `description`,
 | `argocd/apps/<app>.yaml` | Nom, description, modules/services, dépôt code et dépôt IaC |
 | `argocd/generated/apps/<app>/app-project.yaml` | Périmètre ArgoCD autorisé, généré (inclut `spec.description`) |
 | `argocd/generated/apps/<app>/applicationset.yaml` | Applications ArgoCD par environnement, générées |
+| `argocd/generated/apps/<app>/ghcr-pull-secret.yaml` | Namespaces applicatifs + Jobs qui recopient le secret source `ghcr-pull-secret` (namespace `argocd`) en `ghcr-pull` dans chaque namespace d'environnement, générés |
 | `argocd/generated/apps/<app>/repo-creds.yaml` | Secret ArgoCD/RBAC dédiés au dépôt manifests de l'app, générés |
 | `argocd/generated/apps/<app>/kustomization.yaml` | Agrège les ressources générées |
 
