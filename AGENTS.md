@@ -41,7 +41,8 @@ flux-secrets/            Secrets Kubernetes chiffrés avec SOPS/age et appliqué
 ```
 
 Il n'y a pas de registry Docker interne au cluster : les images applicatives
-sont poussées sur GHCR (détail dans `docs/spec-fonctionnelle.md`).
+sont poussées sur GHCR (détail dans `docs/spec-technique.md`, section
+"Registre d'images").
 
 ## Règles critiques
 

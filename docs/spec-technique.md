@@ -32,10 +32,6 @@ flux-secrets/
   github-credentials.yaml     Secret Flux chiffré SOPS pour lire GitHub
 ```
 
-Note : `argocd/apps/test.yaml` et `argocd/generated/apps/test/` sont une app
-de test résiduelle utilisée pour valider le pipeline d'onboarding ; elle ne
-correspond à aucun dépôt applicatif réel.
-
 ## `argocd/apps.yaml` — métadonnées plateforme
 
 Ce fichier fixe les constantes résolues par `platform_inventory.py` :

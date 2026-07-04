@@ -9,7 +9,7 @@ plateforme. Les images applicatives sont poussées sur GHCR, un registre
 externe non géré par ce dépôt.
 
 La vision globale de la chaîne CI/CD est dans
-`../../platform-cicd/docs/prd.md`.
+`../../control-plane/docs/prd.md`.
 
 ## Produit attendu
 
