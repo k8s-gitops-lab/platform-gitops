@@ -106,7 +106,7 @@ spec:
           \  kubectl -n gitlab get secret gitlab-gitlab-initial-root-password \\\n\
           \    -o jsonpath='{.data.password}' | base64 -d\n)\n\nkubectl -n argocd\
           \ create secret generic gitlab-test-iac-repo \\\n  --from-literal=type=git\
-          \ \\\n  --from-literal=url=http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git\
+          \ \\\n  --from-literal=url=http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git\
           \ \\\n  --from-literal=username=root \\\n  --from-literal=password=\"$password\"\
           \ \\\n  --dry-run=client -o yaml \\\n  | kubectl -n argocd label -f - argocd.argoproj.io/secret-type=repository\
           \ --local -o yaml \\\n  | kubectl apply -f -\n"

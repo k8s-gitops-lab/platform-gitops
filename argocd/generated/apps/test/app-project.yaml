@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Application de démonstration du pattern CI/CD complet
   sourceRepos:
-  - http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git
+  - http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git
   destinations:
   - server: https://kubernetes.default.svc
     namespace: test-dev

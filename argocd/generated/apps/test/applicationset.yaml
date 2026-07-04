@@ -15,28 +15,28 @@ spec:
         env: dev
         branch: dev
         namespace: test-dev
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git
+        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git
         path: k8s
       - app: test
         project: test
         env: rec
         branch: rec
         namespace: test-rec
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git
+        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git
         path: k8s
       - app: test
         project: test
         env: preprod
         branch: preprod
         namespace: test-preprod
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git
+        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git
         path: k8s
       - app: test
         project: test
         env: prod
         branch: main
         namespace: test
-        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/infra/test-iac.git
+        repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/test-groupe/test-iac.git
         path: k8s
   template:
     metadata:
