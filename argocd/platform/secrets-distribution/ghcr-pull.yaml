@@ -8,7 +8,10 @@ kind: ClusterExternalSecret
 metadata:
   name: ghcr-pull
 spec:
-  refreshTime: 1h
+  # Intervalle de re-liste des namespaces cibles : court, pour converger vite
+  # au bootstrap (ex. webhook ESO pas encore pret au premier passage). Le
+  # refresh du contenu des secrets est porte par externalSecretSpec.
+  refreshTime: 5m
   namespaceSelectors:
     - matchLabels:
         k8s-gitops-lab.io/ghcr-pull: enabled
