@@ -1,0 +1,32 @@
+# Distribue le secret source argocd/ghcr-pull-secret (depose par Flux depuis
+# flux-secrets/, chiffre SOPS) vers chaque namespace applicatif sous le nom
+# ghcr-pull. Les namespaces cibles sont ceux portant le label
+# k8s-gitops-lab.io/ghcr-pull=enabled, pose par render-argocd-apps.py
+# (platform-cicd) sur les namespaces d'environnement.
+apiVersion: external-secrets.io/v1
+kind: ClusterExternalSecret
+metadata:
+  name: ghcr-pull
+spec:
+  refreshTime: 1h
+  namespaceSelectors:
+    - matchLabels:
+        k8s-gitops-lab.io/ghcr-pull: enabled
+  externalSecretName: ghcr-pull
+  externalSecretSpec:
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: argocd-secrets
+    target:
+      name: ghcr-pull
+      creationPolicy: Owner
+      template:
+        type: kubernetes.io/dockerconfigjson
+        data:
+          .dockerconfigjson: "{{ .dockerconfigjson }}"
+    data:
+      - secretKey: dockerconfigjson
+        remoteRef:
+          key: ghcr-pull-secret
+          property: .dockerconfigjson

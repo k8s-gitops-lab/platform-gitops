@@ -25,6 +25,10 @@ spec:
             path: argocd/platform/gitlab-minio-patch
             namespace: gitlab
             wave: "1"
+          - name: secrets-distribution
+            path: argocd/platform/secrets-distribution
+            namespace: external-secrets
+            wave: "1"
   template:
     metadata:
       name: "{{ .name }}"
@@ -49,3 +53,11 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+        # Les CR ExternalSecret/ClusterSecretStore dependent des CRD posees
+        # par l'Application external-secrets : on reessaie jusqu'a convergence.
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 5m

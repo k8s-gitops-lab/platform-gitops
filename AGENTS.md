@@ -92,10 +92,9 @@ Plus besoin de lancer `make argocd-apps-render` à la main ni de toucher
   `argocd/apps/<app>.yaml` puis régénérer.
 - Ne pas committer de secrets non chiffrés dans ce dépôt.
 - Ne pas ajouter de Job qui fabrique le contenu d'un secret `flux-secrets/*.yaml`
-  au runtime : ces secrets restent des manifestes SOPS statiques. En revanche,
-  un Job de copie d'un secret déjà présent en cluster vers un namespace
-  applicatif (ex. `repo-creds.yaml`, `ghcr-pull-secret.yaml`) est le pattern
-  attendu dans `argocd/generated/apps/<app>/`, car ArgoCD ne sait pas déchiffrer
-  SOPS nativement.
+  au runtime : ces secrets restent des manifestes SOPS statiques. La copie ou
+  la dérivation d'un secret déjà présent en cluster passe par External Secrets
+  Operator (`argocd/platform/secrets-distribution/`, ExternalSecrets générés
+  dans `argocd/generated/apps/<app>/`), jamais par un Job kubectl.
 - Ne pas pousser sur `main` sans avoir vérifié que `make check-generated` passe
   dans `platform-cicd`.

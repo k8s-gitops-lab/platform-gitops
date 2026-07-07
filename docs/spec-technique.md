@@ -66,17 +66,19 @@ forme chiffrée avec SOPS/age dans `flux-secrets/`.
 | Secret Kubernetes | Fichier | Consommateur |
 |-------------------|---------|--------------|
 | `github-credentials` | `flux-secrets/github-credentials.yaml` | `GitRepository/gitlab-projects-iac` et `Terraform/gitlab-iac` |
+| `ghcr-pull-secret` | `flux-secrets/ghcr-pull-secret.yaml` | Secret source GHCR (namespace `argocd`), distribué par External Secrets Operator |
 
 Flux applique ces secrets via `argocd/platform/tf-controller/flux-secrets-kustomization.yaml`
 avec `decryption.provider: sops` et `secretRef.name: sops-age`. Le secret
 `sops-age` reste un prérequis de bootstrap : il contient la clé privée age et ne
 doit pas être committé.
 
-Le secret `ghcr-pull` (pull d'images depuis GHCR) n'est pas ici : ArgoCD ne sait
-pas déchiffrer SOPS nativement, donc `control-plane` (`make ghcr-pull-secret`)
-dépose une seule fois un secret source `ghcr-pull-secret` dans le namespace
-`argocd`, et chaque app le recopie dans ses propres namespaces via les Jobs
-définis dans `argocd/generated/apps/<app>/ghcr-pull-secret.yaml`.
+Le secret source `ghcr-pull-secret` (pull d'images depuis GHCR) est généré par
+`control-plane make ghcr-token-init`, déposé dans le namespace `argocd` par la
+Kustomization Flux ci-dessus, puis distribué en continu sous le nom `ghcr-pull`
+par External Secrets Operator (`argocd/platform/secrets-distribution/`) dans
+tout namespace portant le label `k8s-gitops-lab.io/ghcr-pull=enabled` — label
+posé par les `Namespace` générés dans `argocd/generated/apps/<app>/namespaces.yaml`.
 
 Le secret `gitlab-tf-credentials` n'est pas versionné : `platform-cicd` le crée
 après `gitlab-wait` via `make gitlab-tf-credentials`. Cette étape lit le mot de
@@ -112,8 +114,8 @@ description source, écrite à la main (champs minimums : `name`, `description`,
 | `argocd/apps/<app>.yaml` | Nom, description, modules/services, dépôt code et dépôt IaC |
 | `argocd/generated/apps/<app>/app-project.yaml` | Périmètre ArgoCD autorisé, généré (inclut `spec.description`) |
 | `argocd/generated/apps/<app>/applicationset.yaml` | Applications ArgoCD par environnement, générées |
-| `argocd/generated/apps/<app>/ghcr-pull-secret.yaml` | Namespaces applicatifs + Jobs qui recopient le secret source `ghcr-pull-secret` (namespace `argocd`) en `ghcr-pull` dans chaque namespace d'environnement, générés |
-| `argocd/generated/apps/<app>/repo-creds.yaml` | Secret ArgoCD/RBAC dédiés au dépôt manifests de l'app, générés |
+| `argocd/generated/apps/<app>/namespaces.yaml` | Namespaces d'environnement labellisés pour la distribution du secret `ghcr-pull` par External Secrets, générés |
+| `argocd/generated/apps/<app>/repo-creds.yaml` | ExternalSecret qui fabrique le secret repository ArgoCD du dépôt manifests de l'app, généré |
 | `argocd/generated/apps/<app>/kustomization.yaml` | Agrège les ressources générées |
 
 Depuis l'ajout du pipeline `.gitlab-ci.yml` (projet GitLab `platform-gitops`),
@@ -142,5 +144,6 @@ make check-generated
 Il n'y a pas de registry Docker déployé dans le cluster. `argocd/apps.yaml`
 déclare `registry.host: ghcr.io/k8s-gitops-lab` : c'est la valeur
 consommée par `platform_inventory.py` pour construire les références
-d'image des apps. Voir `docs/spec-fonctionnelle.md` pour le flux du secret
-de pull (`ghcr-pull-secret`).
+d'image des apps. Le secret de pull source (`ghcr-pull-secret`) vit chiffré
+dans `flux-secrets/` et est distribué par External Secrets Operator (voir
+"Secrets GitOps" ci-dessus).
