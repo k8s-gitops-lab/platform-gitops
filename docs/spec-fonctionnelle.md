@@ -3,7 +3,7 @@
 ## Modèle de synchronisation ArgoCD
 
 ArgoCD surveille ce dépôt via l'Application racine (`root`) appliquée une
-seule fois à la main depuis `platform-cicd`. Cette Application cible
+seule fois à la main depuis `platform-bootstrap`. Cette Application cible
 `argocd/managed/` sur la branche `main`.
 
 Tout ce qui se trouve dans `argocd/managed/` est donc géré par ArgoCD :
@@ -44,7 +44,7 @@ en continu vers GitHub comme les autres projets applicatifs). Le merge sur
 `main` déclenche directement le pipeline `.gitlab-ci.yml` de ce projet, qui :
 
 1. génère les AppProject, ApplicationSet par environnement et credentials repo
-   sous `argocd/generated/apps/<app>/` (via `platform-cicd/scripts/render-argocd-apps.py`)
+   sous `argocd/generated/apps/<app>/` (via `platform-bootstrap/scripts/render-argocd-apps.py`)
    et les commit sur ce même projet GitLab (le push mirror propage vers GitHub) ;
 2. génère `gitlab-projects-iac/terraform/apps.auto.tfvars.json` (via
    `toolbox/scripts/render-gitlab-projects.py`) et le commit directement sur

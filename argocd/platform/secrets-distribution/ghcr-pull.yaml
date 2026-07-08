@@ -2,7 +2,7 @@
 # flux-secrets/, chiffre SOPS) vers chaque namespace applicatif sous le nom
 # ghcr-pull. Les namespaces cibles sont ceux portant le label
 # k8s-gitops-lab.io/ghcr-pull=enabled, pose par render-argocd-apps.py
-# (platform-cicd) sur les namespaces d'environnement.
+# (platform-bootstrap) sur les namespaces d'environnement.
 apiVersion: external-secrets.io/v1
 kind: ClusterExternalSecret
 metadata:

@@ -9,7 +9,7 @@ plateforme. Les images applicatives sont poussées sur GHCR, un registre
 externe non géré par ce dépôt.
 
 La vision globale de la chaîne CI/CD est dans
-`../../control-plane/docs/prd.md`.
+`../../cockpit/docs/prd.md`.
 
 ## Produit attendu
 
@@ -28,7 +28,7 @@ Le dépôt doit fournir :
   l'Application racine.
 - **Mainteneur plateforme** : ajoute ou modifie des composants plateforme sans
   embarquer de configuration applicative.
-- **Scripts `platform-cicd`** : génèrent ou appliquent les points d'entrée
+- **Scripts `platform-bootstrap`** : génèrent ou appliquent les points d'entrée
   ArgoCD de la plateforme.
 
 ## Critères d'acceptation

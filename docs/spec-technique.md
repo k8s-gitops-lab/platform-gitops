@@ -74,13 +74,13 @@ avec `decryption.provider: sops` et `secretRef.name: sops-age`. Le secret
 doit pas être committé.
 
 Le secret source `ghcr-pull-secret` (pull d'images depuis GHCR) est généré par
-`control-plane make ghcr-token-init`, déposé dans le namespace `argocd` par la
+`cockpit make ghcr-token-init`, déposé dans le namespace `argocd` par la
 Kustomization Flux ci-dessus, puis distribué en continu sous le nom `ghcr-pull`
 par External Secrets Operator (`argocd/platform/secrets-distribution/`) dans
 tout namespace portant le label `k8s-gitops-lab.io/ghcr-pull=enabled` — label
 posé par les `Namespace` générés dans `argocd/generated/apps/<app>/namespaces.yaml`.
 
-Le secret `gitlab-tf-credentials` n'est pas versionné : `platform-cicd` le crée
+Le secret `gitlab-tf-credentials` n'est pas versionné : `platform-bootstrap` le crée
 après `gitlab-wait` via `make gitlab-tf-credentials`. Cette étape lit le mot de
 passe root initial GitLab, crée/rotate un PAT `terraform-controller`, puis écrit
 le Secret Kubernetes dans `flux-system` pour `Terraform/gitlab-iac`.
@@ -110,7 +110,7 @@ description source, écrite à la main et proposée par pull/merge request
 directe. Le format est défini par le JSON Schema `argocd/apps.schema.json`
 (source de vérité du contrat) : seuls `name` et `group` sont requis, tout le
 reste est dérivé par convention (voir
-`platform-cicd/scripts/platform_inventory.py`). `apiVersion: platform/v1`
+`platform-bootstrap/scripts/platform_inventory.py`). `apiVersion: platform/v1`
 versionne le contrat. Une MR touchant `argocd/apps/**` est validée en CI
 contre ce schéma (job `validate-inventory`, `scripts/validate-inventory.py`)
 — un champ inconnu ou un type invalide échoue avant le merge :
@@ -127,7 +127,7 @@ contre ce schéma (job `validate-inventory`, `scripts/validate-inventory.py`)
 Depuis l'ajout du pipeline `.gitlab-ci.yml` (projet GitLab `platform-gitops`),
 la génération n'est plus une étape manuelle : elle se déclenche automatiquement
 au merge d'une MR touchant `argocd/apps/**`. `make argocd-apps-render` /
-`make check-generated` (depuis `platform-cicd`) restent disponibles pour
+`make check-generated` (depuis `platform-bootstrap`) restent disponibles pour
 vérifier ou régénérer en local :
 
 ```bash

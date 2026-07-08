@@ -26,7 +26,7 @@ validate-inventory:
     - python3 scripts/validate-inventory.py
 # Les PR/MR sur platform-gitops se font directement sur ce projet GitLab (pas
 # sur GitHub) : ce pipeline se déclenche nativement au merge sur main, sans
-# délai de mirror. Il régénère les manifests ArgoCD (platform-cicd) et la
+# délai de mirror. Il régénère les manifests ArgoCD (platform-bootstrap) et la
 # liste des projets GitLab (toolbox), commit sur ce même projet (le push
 # mirror gitlab_project_mirror.platform_gitops_to_github propage ensuite vers
 # GitHub, dépôt surveillé par ArgoCD/Flux), et pousse directement vers GitHub
@@ -50,11 +50,11 @@ onboard-apps:
     - git config --global user.name "gitops-bot"
     - git config --global user.email "gitops-bot@users.noreply.github.com"
   script:
-    - git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/k8s-gitops-lab/platform-cicd.git" /tmp/platform-cicd
+    - git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/k8s-gitops-lab/platform-bootstrap.git" /tmp/platform-bootstrap
     - git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/k8s-gitops-lab/toolbox.git" /tmp/toolbox
     - git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/k8s-gitops-lab/gitlab-projects-iac.git" /tmp/gitlab-projects-iac
-    - pip install -q -r /tmp/platform-cicd/requirements.txt -r /tmp/toolbox/requirements.txt
-    - python3 /tmp/platform-cicd/scripts/render-argocd-apps.py --apps-file "${CI_PROJECT_DIR}/argocd/apps.yaml"
+    - pip install -q -r /tmp/platform-bootstrap/requirements.txt -r /tmp/toolbox/requirements.txt
+    - python3 /tmp/platform-bootstrap/scripts/render-argocd-apps.py --apps-file "${CI_PROJECT_DIR}/argocd/apps.yaml"
     - python3 /tmp/toolbox/scripts/render-gitlab-projects.py --apps-file "${CI_PROJECT_DIR}/argocd/apps.yaml" --output /tmp/gitlab-projects-iac/terraform/apps.auto.tfvars.json
     - |
       if [ -n "$(git status --porcelain -- argocd/generated argocd/managed)" ]; then

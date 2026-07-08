@@ -4,7 +4,7 @@
 
 `platform-gitops` est la source de vérité GitOps de la plateforme du POC.
 ArgoCD surveille ce dépôt en continu via l'Application racine
-(`argocd/root-app.yaml` dans `platform-cicd`). Tout changement committé ici est
+(`argocd/root-app.yaml` dans `platform-bootstrap`). Tout changement committé ici est
 réconcilié automatiquement sur le cluster.
 
 Le provisioning initial de la plateforme doit rester sans application. Les
@@ -47,14 +47,14 @@ sont poussées sur GHCR (détail dans `docs/spec-technique.md`, section
 ## Règles critiques
 
 - **`argocd/managed/` est généré/maintenu par le bootstrap plateforme** dans
-  `platform-cicd`. Ne jamais éditer ces fichiers à la main.
+  `platform-bootstrap`. Ne jamais éditer ces fichiers à la main.
 - **`argocd/managed/` n'est pas une couche fonctionnelle** : c'est seulement le
   point d'entrée ArgoCD généré. Il peut contenir un ApplicationSet générique
   vers `argocd/generated/apps/*`, mais pas de détails propres à une application.
 - **`argocd/apps/<app>.yaml` est la source de vérité applicative**. Les
   AppProject, ApplicationSet et credentials ArgoCD de l'app sont générés dans
   `argocd/generated/apps/<app>/` via `make argocd-apps-render` depuis
-  `platform-cicd`.
+  `platform-bootstrap`.
 - **`argocd/apps.yaml`** contient les constantes de plateforme (domaine, registry,
   URL GitOps). Modifier ici impacte tous les dérivés.
 - **`flux-secrets/*.yaml`** sont les seuls secrets GitOps versionnés. Ils doivent
@@ -97,4 +97,4 @@ Plus besoin de lancer `make argocd-apps-render` à la main ni de toucher
   Operator (`argocd/platform/secrets-distribution/`, ExternalSecrets générés
   dans `argocd/generated/apps/<app>/`), jamais par un Job kubectl.
 - Ne pas pousser sur `main` sans avoir vérifié que `make check-generated` passe
-  dans `platform-cicd`.
+  dans `platform-bootstrap`.

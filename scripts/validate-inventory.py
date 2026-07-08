@@ -5,7 +5,7 @@ Feedback avant merge : ce validateur tourne en CI sur les MR touchant
 argocd/apps/**, pour attraper un champ inconnu (faute de frappe) ou un type
 invalide avant que le rendu ArgoCD (post-merge) n'echoue. Le schema
 apps.schema.json est la source de verite du contrat ; il doit rester
-coherent avec platform-cicd/scripts/platform_inventory.py:_normalize_app.
+coherent avec platform-bootstrap/scripts/platform_inventory.py:_normalize_app.
 
 Usage : validate-inventory.py [--apps-dir DIR] [--schema FILE]
 Sortie non nulle si au moins un fichier est invalide.

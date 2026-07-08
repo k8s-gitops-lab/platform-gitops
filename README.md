@@ -19,5 +19,5 @@ ressources applicatives sont ajoutées ensuite sous `argocd/apps/<app>.yaml`,
 puis générées sous `argocd/generated/apps/<app>/`. Elles ne doivent pas être
 mélangées à `argocd/platform/`.
 
-Le bootstrap technique reste dans `../platform-cicd` : installation ArgoCD,
+Le bootstrap technique reste dans `../platform-bootstrap` : installation ArgoCD,
 configuration initiale et commandes operateur.
