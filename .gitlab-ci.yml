@@ -1,6 +1,29 @@
 stages:
+  - validate
   - onboard
 
+# Validation du contrat d'inventaire (argocd/apps/<app>.yaml) contre le JSON
+# Schema argocd/apps.schema.json. Tourne sur la MR (feedback avant merge) et
+# sur main (filet de securite) quand l'inventaire change : attrape un champ
+# inconnu ou un type invalide avant que le rendu ArgoCD post-merge n'echoue.
+validate-inventory:
+  stage: validate
+  image: python:3.12-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - argocd/apps/**/*
+        - argocd/apps.schema.json
+        - scripts/validate-inventory.py
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - argocd/apps/**/*
+        - argocd/apps.schema.json
+        - scripts/validate-inventory.py
+  before_script:
+    - pip install --quiet jsonschema pyyaml
+  script:
+    - python3 scripts/validate-inventory.py
 # Les PR/MR sur platform-gitops se font directement sur ce projet GitLab (pas
 # sur GitHub) : ce pipeline se déclenche nativement au merge sur main, sans
 # délai de mirror. Il régénère les manifests ArgoCD (platform-cicd) et la

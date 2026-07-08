@@ -1,3 +1,4 @@
+apiVersion: platform/v1
 name: helloworld
 group: hello-groupe
 description: "Application de démonstration du pattern CI/CD complet"

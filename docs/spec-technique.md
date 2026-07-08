@@ -106,8 +106,14 @@ credential ou namespace propre à une application. Ces objets doivent être dans
 
 Le dépôt est livré sans application déclarée pour que le provisioning plateforme
 reste indépendant. Après provisioning, chaque application possède une
-description source, écrite à la main (champs minimums : `name`, `description`,
-`services`) et proposée par pull/merge request directe :
+description source, écrite à la main et proposée par pull/merge request
+directe. Le format est défini par le JSON Schema `argocd/apps.schema.json`
+(source de vérité du contrat) : seuls `name` et `group` sont requis, tout le
+reste est dérivé par convention (voir
+`platform-cicd/scripts/platform_inventory.py`). `apiVersion: platform/v1`
+versionne le contrat. Une MR touchant `argocd/apps/**` est validée en CI
+contre ce schéma (job `validate-inventory`, `scripts/validate-inventory.py`)
+— un champ inconnu ou un type invalide échoue avant le merge :
 
 | Fichier | Rôle |
 |---------|------|

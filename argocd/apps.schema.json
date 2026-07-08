@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/k8s-gitops-lab/platform-gitops/argocd/apps.schema.json",
+  "title": "Entrée d'inventaire d'application (platform/v1)",
+  "description": "Contrat d'une app standard : un fichier argocd/apps/<app>.yaml. Seuls name et group sont requis ; tout le reste est dérivé par convention (voir platform-cicd/scripts/platform_inventory.py:_normalize_app). Ce schéma est la source de vérité du format minimum et des surcharges autorisées.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "group"],
+  "properties": {
+    "apiVersion": {
+      "description": "Version du contrat d'inventaire. Optionnel aujourd'hui ; recommandé pour figer la version.",
+      "const": "platform/v1"
+    },
+    "name": {
+      "description": "Nom de l'app. Sert de base à tous les dérivés (projets GitLab, namespaces, projet ArgoCD).",
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+      "maxLength": 40
+    },
+    "group": {
+      "description": "Groupe GitLab propriétaire (multi-tenancy). Les projets <app> et <app>-iac sont créés sous ce groupe.",
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "hasPreprod": {
+      "description": "Ajoute l'environnement preprod à la séquence dérivée dev -> rec -> (preprod) -> prod. Ignoré si environments est fourni explicitement.",
+      "type": "boolean"
+    },
+    "importFromGithub": {
+      "description": "Le projet GitLab doit être importé depuis GitHub plutôt que créé vide (app préexistante).",
+      "type": "boolean"
+    },
+    "services": {
+      "description": "Services du monorepo. Forme courte : liste de noms (l'image est dérivée <registry>/<service>). Forme longue : liste de {name, image}.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "image": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "showcaseService": {
+      "description": "Service mis en avant. Dérivé si absent (heuristique gui/ui/web/front, sinon premier service).",
+      "type": "string"
+    },
+    "environments": {
+      "description": "Surcharge complète de la séquence d'environnements. Si absent, dérivé depuis hasPreprod. Chaque entrée doit être complète (name, branch, namespace, services). L'axe 5 du backlog étendra ce champ à une déclaration par noms.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "branch", "namespace", "services"],
+        "properties": {
+          "name": { "type": "string" },
+          "branch": { "type": "string" },
+          "namespace": { "type": "string" },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "url": { "type": "string" },
+                "ingressHost": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manifests": {
+      "description": "Surcharge des paramètres du dépôt de manifests <app>-iac. Tous les champs sont dérivés si absents.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projectPath": { "type": "string" },
+        "projectName": { "type": "string" },
+        "repoURL": { "type": "string" },
+        "argocdRepoURL": { "type": "string" },
+        "localPath": { "type": "string" },
+        "mainPushAccessLevel": { "type": "integer" },
+        "argocdSecretName": { "type": "string" },
+        "path": { "type": "string" }
+      }
+    },
+    "code": {
+      "description": "Surcharge des paramètres du dépôt de code <app>. Tous les champs sont dérivés si absents.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projectPath": { "type": "string" },
+        "projectName": { "type": "string" },
+        "repoURL": { "type": "string" },
+        "localPath": { "type": "string" },
+        "mainPushAccessLevel": { "type": "integer" }
+      }
+    },
+    "argocd": {
+      "description": "Surcharge du projet ArgoCD. Dérivé si absent.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": { "type": "string" },
+        "sourceRepos": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "destinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["server", "namespace"],
+            "properties": {
+              "server": { "type": "string" },
+              "namespace": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
