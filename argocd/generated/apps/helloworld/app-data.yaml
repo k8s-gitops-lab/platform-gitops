@@ -1,7 +1,7 @@
 app: helloworld
 project: helloworld
 repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/hello-groupe/helloworld-iac.git
-path: k8s
+manifestsPath: k8s
 environments:
 - name: dev
   branch: dev
