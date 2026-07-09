@@ -98,3 +98,10 @@ Plus besoin de lancer `make argocd-apps-render` à la main ni de toucher
   dans `argocd/generated/apps/<app>/`), jamais par un Job kubectl.
 - Ne pas pousser sur `main` sans avoir vérifié que `make check-generated` passe
   dans `platform-bootstrap`.
+
+## Gouvernance du développement
+
+Ce repo fait partie de la plateforme poc-devops : toute contribution suit
+les trois axes de maîtrise (produit, code, architecture) définis dans
+`cockpit/AGENTS.md`, section « Gouvernance du développement » — PRD et
+backlog dans `cockpit/docs/`.
