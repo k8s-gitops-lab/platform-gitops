@@ -107,6 +107,12 @@ gitlab-runner:
           memory_request = "256Mi"
           cpu_limit = "2"
           memory_limit = "2Gi"
+          # Les jobs tournent en root : l'import de CUSTOM_CA_CERTS par les
+          # composants to-be-continuous ecrit dans /etc/ssl/certs, interdit
+          # aux images non-root (ex. syft/docker-sbom). Variables de groupe
+          # GitLab > YAML : impossible de vider la variable par job.
+          [runners.kubernetes.build_container_security_context]
+            run_as_user = 0
 registry:
   enabled: false
 gitlab:
