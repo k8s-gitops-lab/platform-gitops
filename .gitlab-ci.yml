@@ -35,9 +35,8 @@ onboard-apps:
   stage: onboard
   image: python:3.12-slim
   rules:
-    # CI_JOB_TOKEN est en lecture seule sur les pipelines de MR (protection
-    # anti-privilege-escalation) : le job ne peut pousser sur main que sur le
-    # pipeline de branche declenche apres le merge, pas sur celui de la MR.
+    # Regenere seulement apres le merge effectif (pipeline de branche sur
+    # main), jamais sur le pipeline de la MR elle-meme.
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -63,7 +62,10 @@ onboard-apps:
         # ${CI_SERVER_HOST} est l'URL externe (gitlab.192.168.33.100.nip.io),
         # TLS self-signed non approuvé par le conteneur du job : on pousse via
         # l'URL in-cluster HTTP, comme le clone_url du runner (values-local.yaml).
-        git remote set-url origin "http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab-webservice-default.gitlab.svc.cluster.local:8181/${CI_PROJECT_PATH}.git"
+        # CI_JOB_TOKEN ne peut pas pousser sur une branche protegee (main) :
+        # gitlab-projects-iac provisionne pour ca le bot ci-push-bot
+        # (Maintainer sur le groupe infra), expose via GITLAB_PUSH_TOKEN.
+        git remote set-url origin "http://ci-push-bot:${GITLAB_PUSH_TOKEN}@gitlab-webservice-default.gitlab.svc.cluster.local:8181/${CI_PROJECT_PATH}.git"
         git push origin HEAD:main
       else
         echo "Rien a regenerer cote platform-gitops."
