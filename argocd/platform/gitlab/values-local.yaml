@@ -99,10 +99,14 @@ gitlab-runner:
           # Le nœud est arm64 (Apple Silicon) ; sans cette valeur explicite,
           # le runner essaie de tirer le helper en x86_64 et échoue.
           helper_image = "registry.gitlab.com/gitlab-org/gitlab-runner/gitlab-runner-helper:arm64-v18.11.2"
-          cpu_request = "100m"
-          memory_request = "128Mi"
-          cpu_limit = "500m"
-          memory_limit = "512Mi"
+          # Limites dimensionnées pour les builds d'images (cargo build de
+          # helloworld-svc : OOMKilled à 512Mi, très lent à 0.5 CPU — le
+          # driver vfs imposé par le runner non privilégié n'aide pas).
+          # Requests basses : le worker (4 CPU / ~7.5Gi) reste partagé.
+          cpu_request = "250m"
+          memory_request = "256Mi"
+          cpu_limit = "2"
+          memory_limit = "2Gi"
 registry:
   enabled: false
 gitlab:
