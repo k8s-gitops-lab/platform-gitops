@@ -1,0 +1,103 @@
+# Values non secretes du chart grafana/k8s-monitoring (Alloy). Le seul
+# element sensible (le token d'acces Grafana Cloud) vit dans le Secret
+# `grafana-cloud-credentials` (namespace monitoring), distribue par
+# argocd/platform/grafana-cloud-secret/ a partir du secret source chiffre
+# SOPS flux-secrets/grafana-cloud-credentials.yaml -- jamais ici.
+#
+# Cluster mono-noeud arm64 (cf. spec-technique.md) : presets `small` partout,
+# pas de preset `clustered` (coordination multi-replicas, pas de besoin ici).
+cluster:
+  name: k8s-gitops-lab
+
+destinations:
+  grafanaCloudMetrics:
+    type: prometheus
+    url: https://prometheus-prod-68-prod-eu-west-6.grafana.net/api/prom/push
+    auth:
+      type: basic
+      username: "3361944"
+      passwordKey: token
+    secret:
+      create: false
+      name: grafana-cloud-credentials
+      namespace: monitoring
+
+  grafanaCloudLogs:
+    type: loki
+    url: https://logs-prod-043.grafana.net/loki/api/v1/push
+    auth:
+      type: basic
+      username: "1676647"
+      passwordKey: token
+    secret:
+      create: false
+      name: grafana-cloud-credentials
+      namespace: monitoring
+
+  # Reception OTLP prete cote infra pour les traces : aucune app du lab
+  # n'emet de spans aujourd'hui (seule l'instrumentation metriques de
+  # helloworld-svc est faite), ce destination restera donc sans donnees tant
+  # qu'aucune app ne pousse d'OTLP traces vers le collecteur alloy-receiver.
+  grafanaCloudTraces:
+    type: otlp
+    url: https://tempo-prod-31-prod-eu-west-6.grafana.net/tempo
+    protocol: grpc
+    auth:
+      type: basic
+      username: "1670948"
+      passwordKey: token
+    secret:
+      create: false
+      name: grafana-cloud-credentials
+      namespace: monitoring
+    metrics: { enabled: false }
+    logs: { enabled: false }
+    traces: { enabled: true }
+
+# Metriques d'etat des objets Kubernetes (pods, deployments...) + metriques
+# hote (CPU/mem/disk par noeud). Pas de ServiceMonitor/PodMonitor : le
+# cluster n'a pas les CRD Prometheus Operator, cf. prometheusOperatorObjects
+# (desactive) -- l'autodiscovery par annotations ci-dessous les remplace pour
+# les apps.
+clusterMetrics:
+  enabled: true
+  collector: alloy-metrics
+
+hostMetrics:
+  enabled: true
+  collector: alloy-metrics
+
+# Scrape les pods/services portant l'annotation k8s.grafana.com/scrape=true
+# (ex. helloworld-svc, cf. helloworld-iac/k8s/helloworld-svc-deployment.yaml).
+annotationAutodiscovery:
+  enabled: true
+  collector: alloy-metrics
+
+# Logs de tous les pods du cluster, sans annotation requise.
+podLogsViaLoki:
+  enabled: true
+  collector: alloy-logs
+
+# Receveur OTLP in-cluster (grpc/http) pret a recevoir des traces d'app,
+# forwardees vers grafanaCloudTraces -- non consomme par une app aujourd'hui.
+applicationObservability:
+  enabled: true
+  collector: alloy-receiver
+  receivers:
+    otlp:
+      http:
+        enabled: true
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+  node-exporter:
+    deploy: true
+
+collectors:
+  alloy-metrics:
+    presets: [small, statefulset]
+  alloy-logs:
+    presets: [small, filesystem-log-reader, daemonset]
+  alloy-receiver:
+    presets: [small, deployment]

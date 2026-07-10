@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-k8s-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Apres le secret (wave 1, argocd/platform/grafana-cloud-secret) : le
+    # chart lit un Secret existant (auth.passwordKey), il doit deja exister
+    # au premier sync (le retry ci-dessous couvre la convergence residuelle).
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: k8s-monitoring
+      targetRevision: 4.2.1
+      helm:
+        valueFiles:
+          - $values/argocd/platform/grafana-k8s-monitoring/values-local.yaml
+    - repoURL: https://github.com/k8s-gitops-lab/platform-gitops
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
