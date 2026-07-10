@@ -24,6 +24,10 @@ spec:
       name: gitlabcom-credentials
       varsKeys:
         - gitlab_token
+    - kind: Secret
+      name: github-credentials
+      varsKeys:
+        - github_token
   backendConfig:
     secretSuffix: gitlab-projects-iac-com
     inClusterConfig: true
