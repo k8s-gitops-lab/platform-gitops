@@ -28,29 +28,16 @@ spec:
       name: github-credentials
       varsKeys:
         - github_token
-  # State gitlab.com-managed plutot que backend Kubernetes (demande le
-  # 2026-07-10, cf. cockpit/docs/backlog.md) : projet infra/platform-gitops
-  # (id 84305765), nom d'etat gitlab-projects-iac-com. Contenu de
-  # tfstate-default-gitlab-projects-iac-com migre manuellement avant ce
-  # commit (meme serial/lineage verifies apres migration, aucun plan de
-  # recreation). username/password (PAT, scope api) injectes via
-  # backendConfigsFrom -- jamais en clair ici.
+  # Backend Kubernetes (pas gitlab.com) : un backend HTTP gitlab.com aurait
+  # une dependance circulaire avec le script de reset complet gitlab.com
+  # avant chaque bootstrap (cf. cockpit/docs/backlog.md, decision du
+  # 2026-07-10) -- le state vivrait dans le projet platform-gitops,
+  # lui-meme supprime par le reset, donc plus aucun endroit pour stocker
+  # le state du tout premier apply qui recree ce projet. Essaye brievement
+  # en backend HTTP gitlab.com (meme jour), revert ici.
   backendConfig:
-    customConfiguration: |
-      backend "http" {
-        address        = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com"
-        lock_address   = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com/lock"
-        unlock_address = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com/lock"
-        lock_method    = "POST"
-        unlock_method  = "DELETE"
-        retry_wait_min = 5
-      }
-  backendConfigsFrom:
-    - kind: Secret
-      name: gitlabcom-credentials
-      keys:
-        - username
-        - password
+    secretSuffix: gitlab-projects-iac-com
+    inClusterConfig: true
   runnerPodTemplate:
     spec:
       env:
