@@ -1,6 +1,6 @@
 # Droits minimaux du ServiceAccount secrets-distribution :
 # - lire les seuls secrets sources nommes (argocd/ghcr-pull-secret,
-#   argocd/grafana-cloud-credentials, gitlab/gitlab-gitlab-initial-root-password) ;
+#   argocd/grafana-cloud-credentials) ;
 # - create selfsubjectrulesreviews, requis par la validation du provider
 #   kubernetes d'External Secrets.
 apiVersion: rbac.authorization.k8s.io/v1
@@ -41,31 +41,6 @@ kind: RoleBinding
 metadata:
   name: secrets-distribution-read
   namespace: argocd
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: secrets-distribution-read
-subjects:
-  - kind: ServiceAccount
-    name: secrets-distribution
-    namespace: external-secrets
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: secrets-distribution-read
-  namespace: gitlab
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    resourceNames: ["gitlab-gitlab-initial-root-password"]
-    verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: secrets-distribution-read
-  namespace: gitlab
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
