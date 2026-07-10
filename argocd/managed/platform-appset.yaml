@@ -17,14 +17,6 @@ spec:
             path: argocd/platform/argocd-ui
             namespace: argocd
             wave: "0"
-          - name: gitlab-routes
-            path: argocd/platform/gitlab-routes
-            namespace: gitlab
-            wave: "1"
-          - name: gitlab-minio-patch
-            path: argocd/platform/gitlab-minio-patch
-            namespace: gitlab
-            wave: "1"
           - name: secrets-distribution
             path: argocd/platform/secrets-distribution
             namespace: external-secrets

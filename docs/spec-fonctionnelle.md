@@ -22,11 +22,9 @@ détails d'une application viennent de sa description `argocd/apps/<app>.yaml`.
 
 | Dossier | Contenu |
 |---------|---------|
-| `argocd-config/` | `argocd-cm.yaml` (Dex OIDC), `argocd-rbac-cm.yaml`, `argocd-cmd-params-cm.yaml` |
-| `argocd-ui/` | HTTPRoute ArgoCD, HTTPRoute Dex, Service NodePort Dex |
-| `gitlab/` | Values Helm GitLab utilisées au bootstrap |
-| `gitlab-routes/` | HTTPRoutes GitLab (UI, SSH) |
-| `gitlab-minio-patch/` | Patch Kustomize pour les buckets Minio GitLab |
+| `argocd-config/` | `argocd-cm.yaml`, `argocd-rbac-cm.yaml`, `argocd-cmd-params-cm.yaml` — pas de SSO (décommissionné, cf. `docs/backlog.md`) |
+| `argocd-ui/` | HTTPRoute ArgoCD (login local `admin` uniquement) |
+| `gitlab-runner-com/` | Values Helm du runner gitlab.com + CA Zscaler |
 | `tf-controller/` | Manifests du tofu-controller (exécute Terraform depuis Git) |
 | `tf-crds/` | CRDs Terraform consommées par tf-controller |
 

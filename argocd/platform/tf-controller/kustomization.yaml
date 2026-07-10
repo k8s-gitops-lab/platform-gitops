@@ -7,5 +7,4 @@ resources:
   - terraform-runner-rbac.yaml
   - cluster-admin-binding.yaml
   - gitlab-repo.yaml
-  - terraform-gitlab.yaml
   - terraform-gitlab-com.yaml

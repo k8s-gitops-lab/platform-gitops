@@ -10,7 +10,7 @@ argocd/
   generated/apps/              Manifests ArgoCD générés après onboarding app
   managed/                     GÉNÉRÉ — ne pas éditer à la main
     apps-appset.yaml           ApplicationSet générique vers argocd/generated/apps/*
-    gitlab.yaml                Application ArgoCD pour GitLab (chart Helm)
+    gitlab-runner-com.yaml     Application ArgoCD pour le runner gitlab.com (chart Helm)
     platform-appset.yaml       ApplicationSet pour les composants plateforme
     terraform-gitlab.yaml      Application ArgoCD pour le contrôleur Terraform GitLab
     flux-source-controller.yaml Application ArgoCD pour le source-controller Flux
@@ -18,10 +18,8 @@ argocd/
     tf-crds.yaml                Application ArgoCD pour les CRDs Terraform
   platform/                    Manifests des composants plateforme
     argocd-config/             Kustomization : argocd-cm, argocd-rbac-cm, argocd-cmd-params-cm
-    argocd-ui/                 HTTPRoutes ArgoCD et Dex
-    gitlab/                    Values Helm GitLab (bootstrap)
-    gitlab-routes/             HTTPRoutes GitLab
-    gitlab-minio-patch/        Patch Kustomize Minio
+    argocd-ui/                 HTTPRoute ArgoCD (pas de SSO, cf. docs/backlog.md)
+    gitlab-runner-com/         Values Helm + CA Zscaler du runner gitlab.com
     tf-controller/             Manifests du tofu-controller
     tf-crds/                   CRDs Terraform consommées par tf-controller
 docs/
