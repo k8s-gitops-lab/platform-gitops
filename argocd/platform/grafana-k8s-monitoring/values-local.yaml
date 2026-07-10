@@ -4,6 +4,16 @@
 # argocd/platform/grafana-cloud-secret/ a partir du secret source chiffre
 # SOPS flux-secrets/grafana-cloud-credentials.yaml -- jamais ici.
 #
+# Important (verifie par rendu reel du chart, pas dans la doc) : des que
+# `secret.create: false` est utilise sur une destination, TOUS les champs
+# d'auth (username ET password) sont lus depuis le Secret Kubernetes cible,
+# pas seulement ceux portant un `*Key` explicite -- un `auth.username`
+# litteral est silencieusement ignore (vide pour prometheus/loki, erreur
+# fatale au demarrage pour otlp). D'ou usernameKey partout ci-dessous, avec
+# des cles differentes par destination (memes username Basic Auth par
+# service Grafana Cloud). Les 3 instance ID (usernames) sont non sensibles :
+# poses en clair dans le template de argocd/platform/grafana-cloud-secret/.
+#
 # Cluster mono-noeud arm64 (cf. spec-technique.md) : presets `small` partout,
 # pas de preset `clustered` (coordination multi-replicas, pas de besoin ici).
 cluster:
@@ -15,7 +25,7 @@ destinations:
     url: https://prometheus-prod-68-prod-eu-west-6.grafana.net/api/prom/push
     auth:
       type: basic
-      username: "3361944"
+      usernameKey: prom-username
       passwordKey: token
     secret:
       create: false
@@ -27,7 +37,7 @@ destinations:
     url: https://logs-prod-043.grafana.net/loki/api/v1/push
     auth:
       type: basic
-      username: "1676647"
+      usernameKey: loki-username
       passwordKey: token
     secret:
       create: false
@@ -44,7 +54,7 @@ destinations:
     protocol: grpc
     auth:
       type: basic
-      username: "1670948"
+      usernameKey: tempo-username
       passwordKey: token
     secret:
       create: false
