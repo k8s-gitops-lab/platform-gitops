@@ -137,11 +137,13 @@ make check-generated
 
 ## Configuration ArgoCD (`argocd/platform/argocd-config/`)
 
-- **`argocd-cm.yaml`** : configure Dex avec le provider GitLab OIDC.
-  Les valeurs `dex.gitlab.clientID` et `dex.gitlab.clientSecret` sont
-  injectées dans `argocd-secret` par `gitlab-dex-oauth-app.py` lors du bootstrap.
-- **`argocd-rbac-cm.yaml`** : mappe les groupes GitLab sur les rôles ArgoCD
-  (`role:admin` pour tous les utilisateurs connectés dans ce POC mono-équipe).
+- **`argocd-cm.yaml`** : pas de SSO (décommissionné le 2026-07-10, cf.
+  `cockpit/docs/backlog.md` — pas de besoin avéré pour ce lab
+  mono-opérateur). Login local `admin` uniquement.
+- **`argocd-rbac-cm.yaml`** : `policy.default: role:readonly` seul —
+  vestige d'un mapping GitLab retiré, sans effet tant qu'aucune identité
+  SSO ne se connecte (le compte local `admin` n'est pas soumis à cette
+  policy).
 - **`argocd-cmd-params-cm.yaml`** : active `server.insecure=true` pour exposer
   ArgoCD derrière Traefik sans TLS terminé par ArgoCD.
 
