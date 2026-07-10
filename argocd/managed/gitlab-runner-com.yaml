@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitlab-runner-com
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://charts.gitlab.io/
+      chart: gitlab-runner
+      # Meme version que le sous-chart embarque par le GitLab local
+      # (argocd/managed/gitlab.yaml, chart gitlab 9.11.6) pour rester
+      # coherent avec l'image helper arm64 deja pinnee.
+      targetRevision: 0.88.2
+      helm:
+        valueFiles:
+          - $values/argocd/platform/gitlab-runner-com/values.yaml
+    # Meme source aussi utilisee pour son propre contenu (Secret CA
+    # Zscaler, cf. kustomization.yaml de ce dossier) et comme reference
+    # $values pour le chart ci-dessus.
+    - repoURL: https://github.com/k8s-gitops-lab/platform-gitops
+      targetRevision: main
+      path: argocd/platform/gitlab-runner-com
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitlab-runner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

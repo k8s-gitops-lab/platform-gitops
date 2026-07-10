@@ -1,0 +1,40 @@
+# Runner autonome enregistre sur gitlab.com (group_type, groupe
+# k8s-gitops-lab), en parallele du runner local sous-chart de argocd/
+# platform/gitlab/values-local.yaml -- cf. cockpit/docs/backlog.md,
+# migration GitLab -> gitlab.com. Meme version de chart que le sous-chart
+# embarque par argocd/managed/gitlab.yaml (9.11.6 -> gitlab-runner 0.88.2)
+# pour rester coherent avec l'image helper arm64 deja pinnee.
+gitlabUrl: https://gitlab.com/
+rbac:
+  create: true
+# Le token (runner-registration-token vide + runner-token) est cree par
+# platform-bootstrap/scripts/gitlab-runner-token-com.py (make
+# gitlab-runner-token-com), pas ici : pas de secret en clair dans ce repo.
+runners:
+  secret: gitlabcom-gitlab-runner-secret
+  config: |
+    [[runners]]
+      [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+        image = "alpine:latest"
+        # Le noeud est arm64 (Apple Silicon) ; sans cette valeur explicite,
+        # le runner essaie de tirer le helper en x86_64 et echoue -- meme
+        # image que le runner local.
+        helper_image = "registry.gitlab.com/gitlab-org/gitlab-runner/gitlab-runner-helper:arm64-v18.11.2"
+        cpu_request = "250m"
+        memory_request = "256Mi"
+        cpu_limit = "2"
+        memory_limit = "2Gi"
+        # Les jobs tournent en root : l'import de CUSTOM_CA_CERTS par les
+        # composants to-be-continuous ecrit dans /etc/ssl/certs, interdit
+        # aux images non-root (ex. syft/docker-sbom) -- meme contrainte que
+        # le runner local.
+        [runners.kubernetes.build_container_security_context]
+          run_as_user = 0
+# Le trafic sortant du cluster passe par l'inspection TLS Zscaler (meme
+# probleme que Grafana Alloy, cf. section Observabilite du backlog) : sans
+# cette CA le runner ne peut pas joindre gitlab.com pour recuperer les
+# jobs. Ne couvre que le process gitlab-runner lui-meme -- les pods de job
+# recoivent le CA via la variable CI CUSTOM_CA_CERTS (deja geree par
+# ci-templates), pas par ce mecanisme.
+certsSecretName: zscaler-ca-runner-com
