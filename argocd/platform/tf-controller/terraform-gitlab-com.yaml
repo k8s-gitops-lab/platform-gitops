@@ -28,9 +28,29 @@ spec:
       name: github-credentials
       varsKeys:
         - github_token
+  # State gitlab.com-managed plutot que backend Kubernetes (demande le
+  # 2026-07-10, cf. cockpit/docs/backlog.md) : projet infra/platform-gitops
+  # (id 84305765), nom d'etat gitlab-projects-iac-com. Contenu de
+  # tfstate-default-gitlab-projects-iac-com migre manuellement avant ce
+  # commit (meme serial/lineage verifies apres migration, aucun plan de
+  # recreation). username/password (PAT, scope api) injectes via
+  # backendConfigsFrom -- jamais en clair ici.
   backendConfig:
-    secretSuffix: gitlab-projects-iac-com
-    inClusterConfig: true
+    customConfiguration: |
+      backend "http" {
+        address        = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com"
+        lock_address   = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com/lock"
+        unlock_address = "https://gitlab.com/api/v4/projects/84305765/terraform/state/gitlab-projects-iac-com/lock"
+        lock_method    = "POST"
+        unlock_method  = "DELETE"
+        retry_wait_min = 5
+      }
+  backendConfigsFrom:
+    - kind: Secret
+      name: gitlabcom-credentials
+      keys:
+        - username
+        - password
   runnerPodTemplate:
     spec:
       env:
