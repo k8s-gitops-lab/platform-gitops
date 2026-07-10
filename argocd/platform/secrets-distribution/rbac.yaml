@@ -1,6 +1,6 @@
 # Droits minimaux du ServiceAccount secrets-distribution :
 # - lire les seuls secrets sources nommes (argocd/ghcr-pull-secret,
-#   gitlab/gitlab-gitlab-initial-root-password) ;
+#   argocd/grafana-cloud-credentials, gitlab/gitlab-gitlab-initial-root-password) ;
 # - create selfsubjectrulesreviews, requis par la validation du provider
 #   kubernetes d'External Secrets.
 apiVersion: rbac.authorization.k8s.io/v1
@@ -33,7 +33,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    resourceNames: ["ghcr-pull-secret"]
+    resourceNames: ["ghcr-pull-secret", "grafana-cloud-credentials"]
     verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
