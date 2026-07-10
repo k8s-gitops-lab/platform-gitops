@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
 - app-project.yaml
 - namespaces.yaml
-- repo-creds.yaml

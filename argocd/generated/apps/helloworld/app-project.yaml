@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Application de démonstration du pattern CI/CD complet
   sourceRepos:
-  - http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/hello-groupe/helloworld-iac.git
+  - https://gitlab.com/k8s-gitops-lab/hello-groupe/helloworld-iac.git
   destinations:
   - server: https://kubernetes.default.svc
     namespace: helloworld-dev
