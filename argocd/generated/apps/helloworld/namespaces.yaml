@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: helloworld-dev
+  labels:
+    k8s-gitops-lab.io/ghcr-pull: enabled
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: helloworld-rec
+  labels:
+    k8s-gitops-lab.io/ghcr-pull: enabled
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: helloworld-preprod
+  labels:
+    k8s-gitops-lab.io/ghcr-pull: enabled
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: helloworld
+  labels:
+    k8s-gitops-lab.io/ghcr-pull: enabled
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
