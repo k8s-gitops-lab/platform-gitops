@@ -4,3 +4,4 @@ resources:
   - github-credentials.yaml
   - ghcr-pull-secret.yaml
   - grafana-cloud-credentials.yaml
+  - gitlabcom-credentials.yaml

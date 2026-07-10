@@ -8,3 +8,4 @@ resources:
   - cluster-admin-binding.yaml
   - gitlab-repo.yaml
   - terraform-gitlab.yaml
+  - terraform-gitlab-com.yaml

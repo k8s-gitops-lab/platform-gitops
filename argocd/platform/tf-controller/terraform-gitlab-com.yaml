@@ -1,0 +1,43 @@
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: gitlab-iac-com
+  namespace: flux-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  interval: 1h
+  # Manuel pour ce premier run : le state a ete pre-importe (secret
+  # tfstate-default-gitlab-projects-iac-com, seede a la main depuis l'apply
+  # local du module terraform-gitlabcom/) et le plan doit etre verifie
+  # "sans changement" avant tout apply automatique -- cf.
+  # cockpit/docs/backlog.md, section migration GitLab -> gitlab.com,
+  # Phase 2. Repasser en "auto" seulement apres verification.
+  approvePlan: ""
+  destroyResourcesOnDeletion: false
+  path: ./terraform-gitlabcom
+  sourceRef:
+    kind: GitRepository
+    name: gitlab-projects-iac
+    namespace: flux-system
+  varsFrom:
+    - kind: Secret
+      name: gitlabcom-credentials
+      varsKeys:
+        - gitlab_token
+  backendConfig:
+    secretSuffix: gitlab-projects-iac-com
+    inClusterConfig: true
+  runnerPodTemplate:
+    spec:
+      env:
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/extra/zscaler-root-ca.pem
+      volumeMounts:
+        - name: zscaler-ca
+          mountPath: /etc/ssl/extra
+          readOnly: true
+      volumes:
+        - name: zscaler-ca
+          configMap:
+            name: zscaler-ca
