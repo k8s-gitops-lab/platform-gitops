@@ -1,0 +1,53 @@
+apiVersion: platform/v1
+name: helloworld
+group: hello-groupe
+description: "Application de démonstration du pattern CI/CD complet"
+services: [helloworld-svc, helloworld-gui]
+# Séquence d'environnements déclarée explicitement (équivalente à ce que
+# hasPreprod: true dérivait auparavant) — voir axe 5 du backlog
+# extensibilité : la forme courte par simples noms n'est pas encore
+# supportée par le schéma, seule cette forme complète l'est aujourd'hui.
+environments:
+  - name: dev
+    branch: dev
+    namespace: helloworld-dev
+    services:
+      - name: helloworld-svc
+        url: http://helloworld-svc-dev.192.168.33.100.nip.io
+        ingressHost: helloworld-svc-dev.192.168.33.100.nip.io
+      - name: helloworld-gui
+        url: http://helloworld-gui-dev.192.168.33.100.nip.io
+        ingressHost: helloworld-gui-dev.192.168.33.100.nip.io
+  - name: rec
+    branch: rec
+    namespace: helloworld-rec
+    services:
+      - name: helloworld-svc
+        url: http://helloworld-svc-rec.192.168.33.100.nip.io
+        ingressHost: helloworld-svc-rec.192.168.33.100.nip.io
+      - name: helloworld-gui
+        url: http://helloworld-gui-rec.192.168.33.100.nip.io
+        ingressHost: helloworld-gui-rec.192.168.33.100.nip.io
+  - name: preprod
+    branch: preprod
+    namespace: helloworld-preprod
+    services:
+      - name: helloworld-svc
+        url: http://helloworld-svc-preprod.192.168.33.100.nip.io
+        ingressHost: helloworld-svc-preprod.192.168.33.100.nip.io
+      - name: helloworld-gui
+        url: http://helloworld-gui-preprod.192.168.33.100.nip.io
+        ingressHost: helloworld-gui-preprod.192.168.33.100.nip.io
+  - name: prod
+    branch: main
+    namespace: helloworld
+    services:
+      - name: helloworld-svc
+        url: http://helloworld-svc.192.168.33.100.nip.io
+        ingressHost: helloworld-svc.192.168.33.100.nip.io
+      - name: helloworld-gui
+        url: http://helloworld-gui.192.168.33.100.nip.io
+        ingressHost: helloworld-gui.192.168.33.100.nip.io
+# helloworld préexistait sur GitHub avant l'automatisation de l'onboarding :
+# ses projets GitLab doivent être importés, pas créés vides.
+importFromGithub: true
