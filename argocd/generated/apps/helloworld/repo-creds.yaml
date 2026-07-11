@@ -1,0 +1,29 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gitlab-helloworld-iac-repo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: gitlabcom-secrets
+  target:
+    name: gitlab-helloworld-iac-repo
+    creationPolicy: Owner
+    template:
+      metadata:
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      data:
+        type: git
+        url: https://gitlab.com/k8s-gitops-lab/hello-groupe/helloworld-iac.git
+        username: oauth2
+        password: '{{ .password }}'
+  data:
+  - secretKey: password
+    remoteRef:
+      key: gitlabcom-credentials
+      property: password

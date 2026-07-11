@@ -1,6 +1,6 @@
 # Droits minimaux du ServiceAccount secrets-distribution :
 # - lire les seuls secrets sources nommes (argocd/ghcr-pull-secret,
-#   argocd/grafana-cloud-credentials) ;
+#   argocd/grafana-cloud-credentials, flux-system/gitlabcom-credentials) ;
 # - create selfsubjectrulesreviews, requis par la validation du provider
 #   kubernetes d'External Secrets.
 apiVersion: rbac.authorization.k8s.io/v1
@@ -41,6 +41,34 @@ kind: RoleBinding
 metadata:
   name: secrets-distribution-read
   namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secrets-distribution-read
+subjects:
+  - kind: ServiceAccount
+    name: secrets-distribution
+    namespace: external-secrets
+---
+# Autorise la lecture du PAT gitlab.com partage (meme secret que consomme le
+# CR Terraform gitlab-iac-com, cf. terraform-gitlab-com.yaml varsFrom) par les
+# ExternalSecret repo-creds ArgoCD generes par app (render-argocd-apps.py).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secrets-distribution-read
+  namespace: flux-system
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["gitlabcom-credentials"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secrets-distribution-read
+  namespace: flux-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

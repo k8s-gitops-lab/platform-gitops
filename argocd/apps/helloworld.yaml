@@ -51,10 +51,3 @@ environments:
 # helloworld préexistait sur GitHub avant l'automatisation de l'onboarding :
 # ses projets GitLab doivent être importés, pas créés vides.
 importFromGithub: true
-# Cutover vers gitlab.com (cf. cockpit/docs/backlog.md, migration GitLab ->
-# gitlab.com) : mirroring + credential ArgoCD + runner deja valides en
-# isolation avant ce commit. Premiere app migree ; les autres restent sur
-# l'instance locale par defaut (argocdRepoURL derive par convention si
-# absent, cf. platform_inventory.py).
-manifests:
-  argocdRepoURL: https://gitlab.com/k8s-gitops-lab/hello-groupe/helloworld-iac.git

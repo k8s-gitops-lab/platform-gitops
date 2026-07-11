@@ -5,4 +5,3 @@ resources:
   - ghcr-pull-secret.yaml
   - grafana-cloud-credentials.yaml
   - gitlabcom-credentials.yaml
-  - gitlabcom-helloworld-iac-repo.yaml
