@@ -3,6 +3,8 @@ kind: ApplicationSet
 metadata:
   name: app-envs
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '4'
 spec:
   goTemplate: true
   goTemplateOptions:
