@@ -8,13 +8,15 @@ metadata:
 spec:
   interval: 1h
   # State pre-importe (secret tfstate-default-gitlab-projects-iac-com,
-  # seede a la main depuis l'apply local du module terraform-gitlabcom/)
+  # seede a la main depuis l'apply local du module terraform/)
   # puis premier plan verifie "sans changement" en mode manuel avant de
   # passer en auto (2026-07-10) -- cf. cockpit/docs/backlog.md, section
-  # migration GitLab -> gitlab.com, Phase 2.
+  # migration GitLab -> gitlab.com, Phase 2. Module consolide depuis
+  # terraform-gitlabcom/ (module dedie a la migration) le 2026-07-11 --
+  # meme state (secretSuffix inchange), var.apps reintroduit.
   approvePlan: "auto"
   destroyResourcesOnDeletion: false
-  path: ./terraform-gitlabcom
+  path: ./terraform
   sourceRef:
     kind: GitRepository
     name: gitlab-projects-iac

@@ -27,10 +27,12 @@ validate-inventory:
 # Les PR/MR sur platform-gitops se font directement sur ce projet GitLab (pas
 # sur GitHub) : ce pipeline se déclenche nativement au merge sur main, sans
 # délai de mirror. Il régénère les manifests ArgoCD (platform-bootstrap) et la
-# liste des projets GitLab (toolbox), commit sur ce même projet (le push
-# mirror gitlab_project_mirror.platform_gitops_to_github propage ensuite vers
-# GitHub, dépôt surveillé par ArgoCD/Flux), et pousse directement vers GitHub
-# pour gitlab-projects-iac (qui n'a pas d'équivalent GitLab).
+# liste des projets GitLab (toolbox), commit sur ce même projet, et pousse
+# directement vers GitHub (pas de mirror push automatique gitlab.com -> GitHub,
+# dette assumee cf. CLAUDE.md/cockpit/docs/backlog.md) -- ArgoCD/Flux
+# surveillent le dépôt GitHub, donc cette étape est ce qui les tient a jour.
+# Pousse aussi directement vers GitHub pour gitlab-projects-iac (qui n'a pas
+# d'équivalent GitLab).
 onboard-apps:
   stage: onboard
   image: python:3.12-slim
@@ -59,13 +61,12 @@ onboard-apps:
       if [ -n "$(git status --porcelain -- argocd/generated argocd/managed)" ]; then
         git add argocd/generated argocd/managed
         git commit -m "chore(argocd): regenerate app manifests [bot]"
-        # ${CI_SERVER_HOST} est l'URL externe (gitlab.192.168.33.100.nip.io),
-        # TLS self-signed non approuvé par le conteneur du job : on pousse via
-        # l'URL in-cluster HTTP, comme le clone_url du runner (values-local.yaml).
         # CI_JOB_TOKEN ne peut pas pousser sur une branche protegee (main) :
-        # gitlab-projects-iac provisionne pour ca le bot ci-push-bot
-        # (Maintainer sur le groupe infra), expose via GITLAB_PUSH_TOKEN.
-        git remote set-url origin "http://ci-push-bot:${GITLAB_PUSH_TOKEN}@gitlab-webservice-default.gitlab.svc.cluster.local:8181/${CI_PROJECT_PATH}.git"
+        # gitlab-projects-iac fournit GITLAB_PUSH_TOKEN (PAT proprietaire
+        # gitlab.com) pour ca. Meme convention que ci-templates/scripts/deploy.py
+        # (GITLAB_PUSH_SCHEME/GITLAB_PUSH_USERNAME/INTERNAL_GITLAB_HOST,
+        # variables de groupe gitlab-projects-iac/terraform).
+        git remote set-url origin "${GITLAB_PUSH_SCHEME}://${GITLAB_PUSH_USERNAME}:${GITLAB_PUSH_TOKEN}@${INTERNAL_GITLAB_HOST}/${CI_PROJECT_PATH}.git"
         git push origin HEAD:main
       else
         echo "Rien a regenerer cote platform-gitops."
